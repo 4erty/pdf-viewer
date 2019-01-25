@@ -19,3 +19,12 @@ export const createElement = (tagName, attributes, ...children) => {
 
   return element;
 };
+
+export const applyCss = (node, stylesObject) => {
+  const keys = stylesObject !== null && typeof stylesObject === 'object' ? Object.keys(stylesObject) : [];
+  if (keys.length === 0) return;
+
+  keys.forEach(key => {
+    node.style.setProperty(key, stylesObject[key]);
+  });
+};
