@@ -2,24 +2,31 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    brocure: './src/index.js',
-    'pdf.worker': 'pdfjs-dist/build/pdf.worker.entry',
+    brochure: './src/brochure/brochure.js',
+    'pdf.worker': '@bundled-es-modules/pdfjs-dist/pdf.worker.js',
   },
   output: {
-    path: path.resolve(__dirname, 'brocure/'),
-    publicPath: 'brocure/',
+    path: path.resolve(__dirname, 'brochure/'),
+    publicPath: 'brochure/',
     filename: '[name].js',
+    library: '__Brochure',
+    libraryTarget: 'var',
   },
   mode: 'development',
-  devtool: 'inline-source-map',
+  devtool: 'cheap-module-source-map',
   module: {
     rules: [
       {
         test: /\.css$/,
-        exclude: /node_modules/,
+        exclude: /(node_modules|bower_components)/,
         use: [
           'style-loader',
-          'css-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              localIdentName: '[name]__[local]--[hash:base64:5]',
+            },
+          },
         ],
       },
     ],

@@ -1,0 +1,91 @@
+.brocure {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.brocure-book {
+  box-sizing: border-box;
+  position: relative;
+}
+
+.brocure-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 48px;
+  z-index: 3;
+}
+
+.brocure-page {
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.1);
+  display: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.brocure-mainpage {
+  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);
+  display: flex;
+  position: absolute;
+  left: 50%;
+}
+
+.brocure-mainpage::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: rgb(112,66,20, 0.06);
+  box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.brocure-mainpage::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10px;
+  bottom: 0;
+  width: 3px;
+  background: rgba(0,0,0,0.06);
+  box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.move-right {
+  left: 0;
+  perspective-origin: 50% 0%;
+  transform-style: preserve-3d;
+  transform-origin: 100% 50% 0px;
+  backface-visibility: hidden;
+  z-index: 1;
+}
+
+.flip-right {
+  perspective-origin: 0% 50%;
+  transform-origin: 0% 50% 0px;
+  z-index: 2;
+}
+
+.move-left {
+  perspective-origin: 0% 50%;
+  transform-style: preserve-3d;
+  transform-origin: 0% 50% 0px;
+  backface-visibility: hidden;
+  z-index: 1;
+}
+
+.flip-left {
+  perspective-origin: 0% 50%;
+  transform-origin: 100% 50% 0px;
+  z-index: 2;
+}

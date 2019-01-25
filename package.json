@@ -2,14 +2,18 @@
   "name": "brocure",
   "version": "1.0.0",
   "description": "",
-  "main": "brocure.js",
+  "private": true,
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --config=webpack.config.js",
     "watch": "webpack --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Oleg Anisimov",
   "license": "MIT",
+  "dependencies": {
+    "@bundled-es-modules/pdfjs-dist": "^2.0.943-repofix",
+    "pdfjs-dist": "^2.0.943"
+  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
@@ -18,7 +22,6 @@
     "@babel/plugin-transform-spread": "^7.2.2",
     "@babel/preset-env": "^7.3.1",
     "css-loader": "^2.1.0",
-    "pdfjs-dist": "^2.0.943",
     "style-loader": "^0.23.1",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1",
