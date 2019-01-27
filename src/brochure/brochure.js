@@ -1,6 +1,6 @@
 'use strict';
 
-import { pdfjs } from '@bundled-es-modules/pdfjs-dist/index.js';
+const pdfjs = require('pdfjs-dist');
 import './brochure.css';
 
 import { createElement } from '../utils';
@@ -23,12 +23,13 @@ class Brochure {
     this.currentPage = 0;
     this.numPages = 0;
     this.width = html.getBoundingClientRect().width;
-    this.height = options.chart.height.value || 480;
+    this.height = options.height || 480;
     this.posX = 0;
     this.posY = 0;
     this.bookWidth = 0;
     this.scale = 1;
     this.move = 'right';
+    this.angle = -1;
     this.flippedPage = null;
     this.flippedPageBack = null;
     this.flippedPageUnder = null;
@@ -74,7 +75,7 @@ class Brochure {
   flipStart(event) {
     // if pdf with 1 page - return
     if (this.numPages === 1) return;
-    this.flippedPage = event.target.classList.contains('brocure-page') ? event.target : event.target.parentNode;
+    this.flippedPage = event.target.closest('.brocure-page');
 
     // check clicked on right or left page
     this.move = event.clientX - this.posX > this.bookWidth / 2 ? 'right' : 'left';
@@ -104,47 +105,59 @@ class Brochure {
 
   flipMove(event) {
     const pageWidth = this.bookWidth;
-    let angle = 180 - 180 * (event.clientX - this.posX) / pageWidth;
-    if ((this.move === 'right' && angle >= 180) || (this.move === 'left' && angle < 0)) {
-      this.flipEnd(event, true);
+    this.angle = 180 - 180 * (event.clientX - this.posX) / pageWidth;
+    if (this.angle >= 180 || this.angle < 0) {
+      this.flipEnd(event);
       return;
     }
     if (this.move === 'right') {
-      if (angle < 90) {
+      if (this.angle < 90) {
         this.flippedPage.style.zIndex = '3';
         this.flippedPage.style.display = 'flex';
-        this.flippedPage.style.transform = `perspective(2000px) rotateY(-${angle}deg)`;
+        this.flippedPage.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
         this.flippedPageBack.style.display = 'none';
       } else {
         this.flippedPageBack.style.display = 'flex';
-        this.flippedPageBack.style.transform = `perspective(2000px) rotateY(${180 - angle}deg)`;
+        this.flippedPageBack.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
         this.flippedPage.style.display = 'none';
       }
     } else if (this.move === 'left') {
-      if (angle >= 90) {
+      if (this.angle >= 90) {
         this.flippedPage.style.display = 'flex';
-        this.flippedPage.style.transform = `perspective(2000px) rotateY(${180 - angle}deg)`;
+        this.flippedPage.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
         this.flippedPageBack.style.display = 'none';
       } else {
         this.flippedPage.style.display = 'none';
         this.flippedPageBack.style.zIndex = '3';
         this.flippedPageBack.style.display = 'flex';
         this.flippedPageBack.style.left = '50%';
-        this.flippedPageBack.style.transform = `perspective(2000px) rotateY(-${angle}deg)`;
+        this.flippedPageBack.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
       }
     }
   }
 
-  flipEnd(event, out = false) {
+  flipEnd(event) {
     // remove events listeners
     document.removeEventListener(events.move, this.flipMove);
     document.removeEventListener(events.end, this.flipEnd);
     // empty flipped page and styles
     this.flippedPage.style.removeProperty('transform');
-    this.flippedPage.style.removeProperty('display');
-    this.flippedPage.style.removeProperty('left');
     this.flippedPage.style.removeProperty('z-index');
     this.move === 'right' ? this.flippedPage.classList.remove('flip-right') : this.flippedPage.classList.remove('flip-left');
+
+    if ((this.move === 'right' && this.angle <= 90) || (this.move === 'left' && this.angle > 90)) {
+      this.flippedPage = null;
+      this.angle = -1;
+      this.flippedPageBack.style.removeProperty('transform');
+      this.flippedPageBack.style.removeProperty('display');
+      this.move === 'right' ? this.flippedPageBack.classList.remove('move-right') : this.flippedPageBack.classList.remove('move-left');
+
+      this.flippedPageUnder.style.removeProperty('left');
+      this.flippedPageUnder.style.removeProperty('display');
+      return;
+    }
+    this.flippedPage.style.removeProperty('display');
+    this.flippedPage.style.removeProperty('left');
     this.flippedPage = null;
 
     // empty flipped page back and styles
@@ -217,6 +230,7 @@ class Brochure {
         viewport = page.getViewport(this.scale);
         this.bookWidth = 2 * viewport.width;
         this.book.style.width = this.bookWidth + 'px';
+        this.book.style.height = this.height + 'px';
         this.posX = this.book.getBoundingClientRect().x;
         this.posY = this.book.getBoundingClientRect().y;
       }
@@ -231,7 +245,7 @@ class Brochure {
   async initPdf() {
     // Setting worker path to worker bundle.
     // pdfjsLib.GlobalWorkerOptions.workerSrc = `${this.options.workerSrc ? this.options.workerSrc : './'}vendors~pdfjsWorker.js`;
-    pdfjs.GlobalWorkerOptions.workerSrc = `${this.options.workerSrc ? this.options.workerSrc : './'}pdf.worker.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `${this.options.workerSrc ? this.options.workerSrc : './brochure/'}pdf.worker.js`;
 
     try {
       this.pdf = await pdfjs.getDocument(this.url).promise;
