@@ -8,16 +8,21 @@
 </head>
 <body>
   <div class="brocure">
-    <script src="./brochure/brochure.js"></script>
-    <script>
-      // If absolute URL from the remote server is provided, configure the CORS
-      // header on that server.
-      const testUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
-
+    <script defer src="./brochure/pdf.js"></script>
+    <script defer src="./brochure/brochure.js"></script>
+    <script defer>
       document.addEventListener('DOMContentLoaded', () => {
+        const title = 'test brochure';
+        const testUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
         const htmlElement = document.querySelector('.brocure');
-
-        const brocure = new window.__Brochure.default(testUrl, htmlElement);
+        const workerSrc = './brochure/pdf.worker.js';
+        const brocure = new window.__Brochure.default({
+          contentType: 'pdf',
+          data: testUrl,
+          htmlNode: htmlElement,
+          workerSrc,
+          title,
+        });
         brocure.init();
       });
     </script>

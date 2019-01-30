@@ -4,16 +4,13 @@
   "description": "",
   "private": true,
   "scripts": {
+    "start": "webpack-dev-server",
     "build": "webpack --config=webpack.config.js",
     "watch": "webpack --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Oleg Anisimov",
   "license": "MIT",
-  "dependencies": {
-    "@bundled-es-modules/pdfjs-dist": "^2.0.943-repofix",
-    "pdfjs-dist": "^2.0.943"
-  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",

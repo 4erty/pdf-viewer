@@ -1,4 +1,4 @@
-export const createElement = (tagName, attributes, ...children) => {
+export const createElement = (tagName, attributes, children) => {
   const keys = attributes !== null && typeof attributes === 'object' ? Object.keys(attributes) : [];
   const element = document.createElement(tagName);
   if (attributes) {
@@ -7,8 +7,10 @@ export const createElement = (tagName, attributes, ...children) => {
     });
   }
 
-  if (typeof children !== undefined || children !== null) {
-    children.forEach(child => {
+  if (children !== undefined && children !== null) {
+    let arr = children;
+    if (!Array.isArray(arr)) arr = [arr];
+    arr.forEach(child => {
       if (typeof child === 'string') {
         element.appendChild(document.createTextNode(child));
         return;

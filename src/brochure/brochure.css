@@ -1,45 +1,57 @@
-.brocure {
+.brochure {
   box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+  align-items: center;
   position: relative;
+  margin: 24px;
 }
 
-.brocure-book {
+.brochure-title {
+  box-sizing: border-box;
+  display: flex;
+  font-size: 24px;
+  line-height: 24px;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 12px 0;
+}
+
+.brochure-book {
   box-sizing: border-box;
   position: relative;
 }
 
-.brocure-loading {
+.brochure-loading {
   display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 0;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   width: 160px;
   height: 48px;
   z-index: 3;
 }
 
-.brocure-page {
+.brochure-page {
   box-sizing: border-box;
   border: 1px solid rgba(0, 0, 0, 0.1);
   color: rgba(0, 0, 0, 0.1);
   display: none;
   position: absolute;
   z-index: 1;
+  user-select: none;
 }
 
-.brocure-mainpage {
+.brochure-mainpage {
   box-shadow: 10px 10px 30px rgba(0,0,0,0.3);
-  display: flex;
-  position: absolute;
   left: 50%;
 }
 
-.brocure-mainpage::before {
+.brochure-mainpage::before {
   content: '';
   position: absolute;
   top: 0;
@@ -50,7 +62,7 @@
   box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.brocure-mainpage::after {
+.brochure-mainpage::after {
   content: '';
   position: absolute;
   top: 0;
@@ -59,6 +71,11 @@
   width: 3px;
   background: rgba(0,0,0,0.06);
   box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.brochure-image {
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .move-right {
