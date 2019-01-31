@@ -13,8 +13,8 @@
     <script defer>
       document.addEventListener('DOMContentLoaded', () => {
         const title = 'test brochure';
-        const testUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
-        // const testUrl = 'https://www.hq.nasa.gov/alsj/a17/A17_FlightPlan.pdf';
+        // const testUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+        const testUrl = './brochure/A17_FlightPlan.pdf';
         const htmlElement = document.querySelector('.brocure');
         const workerSrc = './brochure/pdf.worker.js';
         const brocure = new window.__Brochure.default({
