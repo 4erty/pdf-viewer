@@ -766,7 +766,7 @@ const TITLE_HEIGHT = 48; // css font-size + padding + margin for class brochure-
 let start = 0;
 let startRender = 0;
 let end = 0;
-let renderEnd = 0;
+let endRender = 0;
 
 class Brochure {
   constructor({

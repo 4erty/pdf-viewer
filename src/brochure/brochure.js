@@ -15,7 +15,7 @@ const TITLE_HEIGHT = 48; // css font-size + padding + margin for class brochure-
 let start = 0;
 let startRender = 0;
 let end = 0;
-let renderEnd = 0;
+let endRender = 0;
 
 class Brochure {
   constructor({
@@ -388,7 +388,7 @@ class Brochure {
     }
     if (!rendered) this.render();
     endRender = performance.now();
-    console.log(`render all html took ${endRender - startRender} milliseconds.`);
+    console.log(`render all html took ${endRender - start} milliseconds.`);
   }
 
   /**
