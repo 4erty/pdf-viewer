@@ -12,6 +12,10 @@ const events = isTouch
 
 const TITLE_HEIGHT = 48; // css font-size + padding + margin for class brochure-title
 
+let start = 0;
+let startRender = 0;
+let end = 0;
+
 class Brochure {
   constructor({
     contentType,
@@ -35,6 +39,7 @@ class Brochure {
     this.pageContentNodes = [];
     this.currentPage = 0;
     this.numPages = 0;
+    this.renderedPages = 0;
     this.width = htmlNode.getBoundingClientRect().width;
     this.height = options.height && options.height.value ? options.height.value : 480;
     this.posX = 0;
@@ -59,28 +64,37 @@ class Brochure {
    * @param {MouseEvent} event - mousedown event
    */
   flipStart(event) {
-    // if pdf with 1 page - return
+    // if pdf with 1 page - can't flip
     if (this.numPages === 1) return;
+
     this.flippedPage = event.target.closest('.brochure-page');
 
     // check clicked on right or left page
     this.move = event.clientX - this.posX > this.bookWidth / 2 ? 'right' : 'left';
 
-    this.move === 'right' ? this.flippedPage.classList.add('flip-right') : this.flippedPage.classList.add('flip-left');
-    let index = this.currentPage === 0 || this.move === 'left' ? 1 : 2;
-
+    // if we see 2 last pages - can't flip to right
+    if (this.currentPage + 2 >= this.numPages && this.move === 'right') return;
     if (this.move === 'left' && this.currentPage === 0) return;
     if (this.move === 'right' && this.currentPage >= this.numPages - 1) return;
+
+    this.move === 'right' ? this.flippedPage.classList.add('flip-right') : this.flippedPage.classList.add('flip-left');
+    let index;
+    if (this.firstPageView === 'cover') index = this.currentPage === 0 || this.move === 'left' ? 1 : 2;
+    if (this.firstPageView === 'spread') index = this.move === 'left' ? 1 : 2;
+
     // set back of flipped page
     this.flippedPageBack = this.move === 'right' ? this.pageNodes[this.currentPage + index] : this.pageNodes[this.currentPage - index];
     this.move === 'right' ? this.flippedPageBack.classList.add('move-right') : this.flippedPageBack.classList.add('move-left');
     // if can - set underlying page
-    if (this.move === 'right' && this.currentPage + 3 < this.numPages - 1) {
+    if (this.move === 'right' && this.currentPage + 2 < this.numPages - 1) {
       this.flippedPageUnder = this.pageNodes[this.currentPage + index + 1];
       this.flippedPageUnder.style.left = '50%';
       this.flippedPageUnder.style.display = 'flex';
     }
-    if (this.move === 'left' && this.currentPage - 2 > 0) {
+    if (
+      (this.move === 'left' && this.currentPage - 2 > 0 && this.firstPageView === 'cover')
+      || (this.move === 'left' && this.currentPage - 2 >= 0 && this.firstPageView === 'spread')
+    ) {
       this.flippedPageUnder = this.pageNodes[this.currentPage - index - 1];
       this.flippedPageUnder.style.left = '0';
       this.flippedPageUnder.style.display = 'flex';
@@ -197,13 +211,26 @@ class Brochure {
     this.pageNodes[this.currentPage].style.removeProperty('transform');
     this.pageNodes[this.currentPage].style.removeProperty('display');
 
+    // render next pages
+    if (this.firstPageView === 'cover' && this.move === 'right' && this.currentPage + 5 >= this.renderedPages) {
+      this.renderPage(this.currentPage + 5);
+      this.renderPage(this.currentPage + 6);
+      this.renderedPages += 2;
+    }
+
+    // render next pages
+    if (this.firstPageView === 'spread' && this.move === 'right' && this.currentPage + 6 >= this.renderedPages) {
+      this.renderPage(this.currentPage + 6);
+      this.renderPage(this.currentPage + 7);
+      this.renderedPages += 2;
+    }
     // flip from cover
-    if (this.currentPage === 0) {
+    if (this.currentPage === 0 && this.firstPageView === 'cover') {
       this.currentPage += 1;
       return;
     }
     // flip to cover
-    if (this.move === 'left' && this.currentPage === 1) {
+    if (this.move === 'left' && this.currentPage === 1 && this.firstPageView === 'cover') {
       if (this.currentPage + 1 < this.numPages) {
         this.pageNodes[this.currentPage + 1].style.removeProperty('display');
         this.pageNodes[this.currentPage + 1].style.removeProperty('left');
@@ -218,7 +245,10 @@ class Brochure {
       return;
     }
     // flip to left
-    if (this.move === 'left' && this.currentPage >= 3) {
+    if (
+      (this.move === 'left' && this.currentPage >= 3 && this.firstPageView === 'cover')
+      || (this.move === 'left' && this.currentPage >= 2 && this.firstPageView === 'spread')
+    ) {
       if (this.currentPage < this.numPages - 1) {
         this.pageNodes[this.currentPage + 1].style.removeProperty('display');
         this.pageNodes[this.currentPage + 1].style.removeProperty('left');
@@ -243,12 +273,22 @@ class Brochure {
         { class: pageClasses.join(' '), 'data-pagenum': page },
         this.pageContentNodes[page],
       );
-      // pageNode.style.width = width;
-      // pageNode.style.height = height;
 
       if (this.firstPageView === 'cover' && page === 0) {
         pageNode.style.display = 'flex';
         pageNode.classList.add('brochure-mainpage');
+      }
+
+      // if view mode is cover and number of pages even - add cover to last page
+      if (this.firstPageView === 'cover' && page === this.numPages - 1 && this.numPages % 2 === 0) pageNode.classList.add('brochure-lastpage');
+      // if view mode is spread - show 2 pages
+      if (this.firstPageView === 'spread' && page === 0) {
+        pageNode.style.display = 'flex';
+        pageNode.style.left = '0';
+      }
+      if (this.firstPageView === 'spread' && page === 1) {
+        pageNode.style.display = 'flex';
+        pageNode.style.left = '50%';
       }
       this.book.appendChild(pageNode);
       this.pageNodes.push(pageNode);
@@ -261,9 +301,14 @@ class Brochure {
    * render html
    */
   render() {
-    for (let i = 0; i < this.numPages; i++) {
+    startRender = performance.now();
+    this.renderedPages = this.numPages >= 10 ? 10 : this.numPages;
+    for (let i = 0; i < this.renderedPages; i++) {
       this.renderPage(i);
     }
+    end = performance.now();
+    console.log(`render pdf took ${startRender - start} milliseconds.`);
+    console.log(`render html took ${end - startRender} milliseconds.`);
     this.book.addEventListener(events.start, this.flipStart);
     this.el.removeChild(this.loading);
   }
@@ -272,6 +317,8 @@ class Brochure {
    * initialisation for pdf file
    */
   async initPdf() {
+    let rendered = false;
+    start = performance.now();
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = this.workerSrc;
 
@@ -307,11 +354,15 @@ class Brochure {
         await page.render(renderContext);
         this.pages.push(page);
         this.pageContentNodes.push(canvas);
+        if (!rendered && i >= 10) {
+          this.render();
+          rendered = true;
+        }
       }
     } catch (err) {
       console.log(err);
     }
-    this.render();
+    if (!rendered) this.render();
   }
 
   /**
@@ -320,7 +371,6 @@ class Brochure {
   initPage() {
     this.numPages = this.url.length;
     for (let i = 0; i < this.numPages; i++) {
-
       if (i === 0) {
         this.bookWidth = this.width;
         this.book.style.width = this.bookWidth + 'px';
@@ -328,7 +378,9 @@ class Brochure {
         this.posY = this.book.getBoundingClientRect().y;
       }
 
-      const content = createElement('img', { class: 'brochure-image', src: this.url[i].url });
+      const content = createElement('img', { class: 'brochure-image', src: this.url[i].url, draggable: false });
+      content.style.width = this.bookWidth / 2 + 'px';
+      content.style.height = this.height + 'px';
       this.pageContentNodes.push(content);
     }
     this.render();
