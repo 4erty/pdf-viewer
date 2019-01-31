@@ -802,7 +802,7 @@ class Brochure {
     this.flippedPage = null;
     this.flippedPageBack = null;
     this.flippedPageUnder = null;
-    this.amimationTimer = null;
+    this.animationFrame = null;
     this.loading = null;
 
     this.flipStart = this.flipStart.bind(this);
@@ -887,11 +887,31 @@ class Brochure {
     }
   }
 
-  flipAnimation() {
-    const frame = 180 / 60;
+  startAnimation() {
+    const start = performance.now();
+    const duration = 600;
+
+    const animate = (time) => {
+      let timePassed = time - start;
+
+      if (timePassed > duration) timePassed = duration;
+
+      this.flipAnimation(timePassed, duration);
+
+      if (timePassed < duration && this.animationFrame !== null) {
+        this.animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    this.animationFrame = requestAnimationFrame(animate);
+  }
+
+  flipAnimation(timePassed, duration) {
+    const frame = timePassed > 0 ? Math.round(1000 * (90 / duration) * timePassed) / 1000 : 0;
+
     if (this.move === 'right' && this.angle < 90) {
-      this.flippedPage.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
       this.angle -= frame;
+      this.flippedPage.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
     }
     if (this.move === 'right' && this.angle >= 90) {
       this.flippedPageBack.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
@@ -906,18 +926,19 @@ class Brochure {
       this.angle -= frame;
     }
     if (this.angle >= 180 || this.angle <= 0) {
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
       this.flipEnd();
-      return;
     }
-    requestAnimationFrame(this.flipAnimation.bind(this));
   }
 
   flipEnd(event) {
     // remove events listeners
     document.removeEventListener(events.move, this.flipMove);
     document.removeEventListener(events.end, this.flipEnd);
+
     if (this.angle > 0 && this.angle < 180) {
-      requestAnimationFrame(this.flipAnimation.bind(this));
+      this.startAnimation();
       return;
     }
     // empty flipped page and styles
@@ -934,6 +955,8 @@ class Brochure {
 
       this.flippedPageUnder && this.flippedPageUnder.style.removeProperty('left');
       this.flippedPageUnder && this.flippedPageUnder.style.removeProperty('display');
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
       return;
     }
     this.flippedPage.style.removeProperty('display');
