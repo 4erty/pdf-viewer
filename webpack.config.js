@@ -3,7 +3,6 @@ const path = require('path');
 module.exports = {
   entry: {
     brochure: './src/brochure/brochure.js',
-    'pdf.worker': '@bundled-es-modules/pdfjs-dist/pdf.worker.js',
   },
   output: {
     path: path.resolve(__dirname, 'brochure/'),

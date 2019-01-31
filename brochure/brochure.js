@@ -96,7 +96,7 @@ var __Brochure =
 
 exports = module.exports = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js")(false);
 // Module
-exports.push([module.i, ".brochure {\n  box-sizing: border-box;\n  display: flex;\n  justify-content: center;\n  position: relative;\n  margin: 24px;\n}\n\n.brochure-book {\n  box-sizing: border-box;\n  position: relative;\n}\n\n.brochure-loading {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  position: absolute;\n  top: 0;\n  left: 50%;\n  transform: translateX(-50%);\n  width: 160px;\n  height: 48px;\n  z-index: 3;\n}\n\n.brochure-page {\n  box-sizing: border-box;\n  border: 1px solid rgba(0, 0, 0, 0.1);\n  color: rgba(0, 0, 0, 0.1);\n  display: none;\n  position: absolute;\n  z-index: 1;\n  user-select: none;\n}\n\n.brochure-mainpage {\n  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);\n  display: flex;\n  position: absolute;\n  left: 50%;\n}\n\n.brochure-mainpage::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  background-color: rgb(112,66,20, 0.06);\n  box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);\n}\n\n.brochure-mainpage::after {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 10px;\n  bottom: 0;\n  width: 3px;\n  background: rgba(0,0,0,0.06);\n  box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);\n}\n\n.brochure-image {\n  max-width: 100%;\n  max-height: 100%;\n}\n\n.move-right {\n  left: 0;\n  perspective-origin: 50% 0%;\n  transform-style: preserve-3d;\n  transform-origin: 100% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-right {\n  perspective-origin: 0% 50%;\n  transform-origin: 0% 50% 0px;\n  z-index: 2;\n}\n\n.move-left {\n  perspective-origin: 0% 50%;\n  transform-style: preserve-3d;\n  transform-origin: 0% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-left {\n  perspective-origin: 0% 50%;\n  transform-origin: 100% 50% 0px;\n  z-index: 2;\n}\n", ""]);
+exports.push([module.i, ".brochure {\n  box-sizing: border-box;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  position: relative;\n  margin: 24px;\n}\n\n.brochure-title {\n  box-sizing: border-box;\n  display: flex;\n  font-size: 24px;\n  line-height: 24px;\n  text-transform: uppercase;\n  margin: 0;\n  padding: 12px 0;\n}\n\n.brochure-book {\n  box-sizing: border-box;\n  position: relative;\n}\n\n.brochure-loading {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 160px;\n  height: 48px;\n  z-index: 3;\n}\n\n.brochure-page {\n  box-sizing: border-box;\n  border: 1px solid rgba(0, 0, 0, 0.1);\n  color: rgba(0, 0, 0, 0.1);\n  display: none;\n  position: absolute;\n  z-index: 1;\n  user-select: none;\n}\n\n.brochure-mainpage {\n  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);\n  left: 50%;\n}\n\n.brochure-mainpage::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  background-color: rgb(112,66,20, 0.06);\n  box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);\n}\n\n.brochure-mainpage::after {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 10px;\n  bottom: 0;\n  width: 3px;\n  background: rgba(0,0,0,0.06);\n  box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);\n}\n\n.brochure-image {\n  max-width: 100%;\n  max-height: 100%;\n}\n\n.move-right {\n  left: 0;\n  perspective-origin: 50% 0%;\n  transform-style: preserve-3d;\n  transform-origin: 100% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-right {\n  perspective-origin: 0% 50%;\n  transform-origin: 0% 50% 0px;\n  z-index: 2;\n}\n\n.move-left {\n  perspective-origin: 0% 50%;\n  transform-style: preserve-3d;\n  transform-origin: 0% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-left {\n  perspective-origin: 0% 50%;\n  transform-origin: 100% 50% 0px;\n  z-index: 2;\n}\n", ""]);
 
 
 
@@ -761,6 +761,7 @@ const events = isTouch
   ? { start: 'touchstart', move: 'touchmove', end: 'touchend' }
   : { start: 'mousedown', move: 'mousemove', end: 'mouseup' };
 
+const TITLE_HEIGHT = 48; // css font-size + padding + margin for class brochure-title
 
 class Brochure {
   constructor({
@@ -768,6 +769,8 @@ class Brochure {
     data,
     htmlNode,
     workerSrc = './brochure/pdf.worker.js',
+    title = null,
+    firstPageView = 'cover',
     options = {},
   }) {
     this.url = data;
@@ -775,9 +778,12 @@ class Brochure {
     this.contentType = contentType;
     this.options = options;
     this.workerSrc = workerSrc;
+    this.title = title;
+    this.firstPageView = firstPageView;
     this.book = null;
     this.pages = [];
     this.pageNodes = [];
+    this.pageContentNodes = [];
     this.currentPage = 0;
     this.numPages = 0;
     this.width = htmlNode.getBoundingClientRect().width;
@@ -791,12 +797,18 @@ class Brochure {
     this.flippedPage = null;
     this.flippedPageBack = null;
     this.flippedPageUnder = null;
+    this.amimationTimer = null;
+    this.loading = null;
 
     this.flipStart = this.flipStart.bind(this);
     this.flipMove = this.flipMove.bind(this);
     this.flipEnd = this.flipEnd.bind(this);
   }
 
+  /**
+   * start fliping page
+   * @param {MouseEvent} event - mousedown event
+   */
   flipStart(event) {
     // if pdf with 1 page - return
     if (this.numPages === 1) return;
@@ -861,10 +873,39 @@ class Brochure {
     }
   }
 
+  flipAnimation() {
+    const frame = 180 / 60;
+    if (this.move === 'right' && this.angle < 90) {
+      this.flippedPage.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
+      this.angle -= frame;
+    }
+    if (this.move === 'right' && this.angle >= 90) {
+      this.flippedPageBack.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
+      this.angle += frame;
+    }
+    if (this.move === 'left' && this.angle >= 90) {
+      this.flippedPage.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
+      this.angle += frame;
+    }
+    if (this.move === 'left' && this.angle < 90) {
+      this.flippedPageBack.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
+      this.angle -= frame;
+    }
+    if (this.angle >= 180 || this.angle <= 0) {
+      this.flipEnd();
+      return;
+    }
+    requestAnimationFrame(this.flipAnimation.bind(this));
+  }
+
   flipEnd(event) {
     // remove events listeners
     document.removeEventListener(events.move, this.flipMove);
     document.removeEventListener(events.end, this.flipEnd);
+    if (this.angle > 0 && this.angle < 180) {
+      requestAnimationFrame(this.flipAnimation.bind(this));
+      return;
+    }
     // empty flipped page and styles
     this.flippedPage.style.removeProperty('transform');
     this.flippedPage.style.removeProperty('z-index');
@@ -909,13 +950,11 @@ class Brochure {
 
     // flip from cover
     if (this.currentPage === 0) {
-      this.pageNodes[0].classList.remove('brochure-mainpage');
       this.currentPage += 1;
       return;
     }
     // flip to cover
     if (this.move === 'left' && this.currentPage === 1) {
-      this.pageNodes[0].classList.add('brochure-mainpage');
       if (this.currentPage + 1 < this.numPages) {
         this.pageNodes[this.currentPage + 1].style.removeProperty('display');
         this.pageNodes[this.currentPage + 1].style.removeProperty('left');
@@ -940,33 +979,28 @@ class Brochure {
     }
   }
 
-
-  async renderPdfPage(page, className) {
+  /**
+   * render html for page
+   * @param {number} page - ppage from pdfjs
+   * @param {string} className - additinal class for page
+   */
+  renderPage(page, className) {
     try {
       let pageClasses = ['brochure-page'];
-      let viewport = page.getViewport(this.scale);
-      const width = Math.round(viewport.width * 1000) / 1000;
-      const height = Math.round(viewport.height * 1000) / 1000;
 
       if (className !== undefined && typeof className === 'string') pageClasses.push(className);
       const pageNode = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])(
         'div',
-        { class: pageClasses.join(' ') },
-        Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('canvas', { width, height }),
+        { class: pageClasses.join(' '), 'data-pagenum': page },
+        this.pageContentNodes[page],
       );
-      pageNode.style.width = width;
-      pageNode.style.height = height;
-      // TODO remove
-      pageNode._pageIndex = page.pageIndex;
-      const canvas = pageNode.querySelector('canvas');
-      const context = canvas.getContext('2d');
+      // pageNode.style.width = width;
+      // pageNode.style.height = height;
 
-      // Render PDF page into canvas context
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
-      };
-      await page.render(renderContext);
+      if (this.firstPageView === 'cover' && page === 0) {
+        pageNode.style.display = 'flex';
+        pageNode.classList.add('brochure-mainpage');
+      }
       this.book.appendChild(pageNode);
       this.pageNodes.push(pageNode);
     } catch (err) {
@@ -974,93 +1008,99 @@ class Brochure {
     }
   }
 
-  async renderPdf() {
-    let page;
-    this.book = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'brochure-book' });
-    // TODO loading state
-    const loading = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'brochure-loading' }, 'Loading...');
-    this.el.appendChild(this.book);
-    this.el.appendChild(loading);
-
-    for (let i = 1; i <= this.numPages; i++) {
-      page = await this.pdf.getPage(i);
-      // if rendered first page - get width and position
-      if (i === 1) {
-        let viewport = page.getViewport(1);
-        this.scale = Math.round(1000 * this.height / viewport.height) / 1000;
-        viewport = page.getViewport(this.scale);
-        this.bookWidth = 2 * viewport.width;
-        this.book.style.width = this.bookWidth + 'px';
-        this.book.style.height = this.height + 'px';
-        this.posX = this.book.getBoundingClientRect().x;
-        this.posY = this.book.getBoundingClientRect().y;
-      }
-      this.pages.push(page);
-      await this.renderPdfPage(page, i === 1 ? 'brochure-mainpage' : undefined);
+  /**
+   * render html
+   */
+  render() {
+    for (let i = 0; i < this.numPages; i++) {
+      this.renderPage(i);
     }
-
     this.book.addEventListener(events.start, this.flipStart);
-    this.el.removeChild(loading);
+    this.el.removeChild(this.loading);
   }
 
+  /**
+   * initialisation for pdf file
+   */
   async initPdf() {
-    console.log(window.location);
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = this.workerSrc;
 
     try {
       this.pdf = await pdfjsLib.getDocument(this.url).promise;
       this.numPages = this.pdf.numPages;
-      await this.renderPdf();
+
+      for (let i = 1; i <= this.numPages; i++) {
+        const page = await this.pdf.getPage(i);
+
+        // if rendered first page - get width and position
+        if (i === 1) {
+          let viewport = page.getViewport(1);
+          this.scale = Math.round(1000 * this.height / viewport.height) / 1000;
+          viewport = page.getViewport(this.scale);
+          this.bookWidth = 2 * viewport.width;
+          this.book.style.width = this.bookWidth + 'px';
+          this.posX = this.book.getBoundingClientRect().x;
+          this.posY = this.book.getBoundingClientRect().y;
+        }
+
+        const viewport = page.getViewport(this.scale);
+        const width = Math.round(viewport.width * 1000) / 1000;
+        const height = Math.round(viewport.height * 1000) / 1000;
+        const canvas = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('canvas', { width, height });
+        const context = canvas.getContext('2d');
+
+        // Render PDF page into canvas context
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+        await page.render(renderContext);
+        this.pages.push(page);
+        this.pageContentNodes.push(canvas);
+      }
     } catch (err) {
       console.log(err);
     }
+    this.render();
   }
 
-  renderPage() {
-    this.book = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'brochure-book' });
-    // TODO loading state
-    const loading = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'brochure-loading' }, 'Loading...');
-    this.el.appendChild(this.book);
-    this.el.appendChild(loading);
+  /**
+   * initialisation for image/pages
+   */
+  initPage() {
+    this.numPages = this.url.length;
     for (let i = 0; i < this.numPages; i++) {
-      // if rendered first page - get width and position
+
       if (i === 0) {
         this.bookWidth = this.width;
-        this.book.style.width = this.width + 'px';
-        this.book.style.height = this.height + 'px';
+        this.book.style.width = this.bookWidth + 'px';
         this.posX = this.book.getBoundingClientRect().x;
         this.posY = this.book.getBoundingClientRect().y;
       }
-      let pageClasses = ['brochure-page'];
 
-      // if (className !== undefined && typeof className === 'string') pageClasses.push(className);
-      const pageNode = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])(
-        'div',
-        { class: pageClasses.join(' ') },
-        Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('img', { class: 'brochure-image', src: this.url[i].url, draggable: false }),
-      );
-      if (i === 0) pageNode.classList.add('brochure-mainpage');
-      pageNode.style.width = this.width / 2 + 'px';
-      pageNode.style.height = this.height + 'px';
-      // TODO remove
-      pageNode._pageIndex = i;
-
-      this.book.appendChild(pageNode);
-      this.pageNodes.push(pageNode);
+      const content = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('img', { class: 'brochure-image', src: this.url[i].url });
+      this.pageContentNodes.push(content);
     }
-
-    this.book.addEventListener(events.start, this.flipStart);
-    this.el.removeChild(loading);
+    this.render();
   }
 
-  initPage() {
-    this.numPages = this.url.length;
-    this.renderPage();
-  }
-
+  /**
+   * initialisation
+   */
   init() {
     this.el.classList.add('brochure');
+    if (this.title !== null) {
+      this.el.appendChild(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('h2', { class: 'brochure-title' }, this.title));
+      this.height -= TITLE_HEIGHT;
+    }
+    this.book = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'brochure-book' });
+    this.book.style.height = this.height + 'px';
+    // TODO loading state
+    this.loading = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'brochure-loading' }, 'Loading...');
+    this.el.appendChild(this.book);
+    this.el.appendChild(this.loading);
+
     if (this.contentType === 'pdf') this.initPdf();
     if (this.contentType === 'page' && Array.isArray(this.url)) this.initPage();
   }
@@ -1082,7 +1122,7 @@ class Brochure {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createElement", function() { return createElement; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "applyCss", function() { return applyCss; });
-const createElement = (tagName, attributes, ...children) => {
+const createElement = (tagName, attributes, children) => {
   const keys = attributes !== null && typeof attributes === 'object' ? Object.keys(attributes) : [];
   const element = document.createElement(tagName);
   if (attributes) {
@@ -1091,8 +1131,10 @@ const createElement = (tagName, attributes, ...children) => {
     });
   }
 
-  if (typeof children !== undefined || children !== null) {
-    children.forEach(child => {
+  if (children !== undefined && children !== null) {
+    let arr = children;
+    if (!Array.isArray(arr)) arr = [arr];
+    arr.forEach(child => {
       if (typeof child === 'string') {
         element.appendChild(document.createTextNode(child));
         return;
