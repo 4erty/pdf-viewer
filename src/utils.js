@@ -11,7 +11,7 @@ export const createElement = (tagName, attributes, children) => {
     let arr = children;
     if (!Array.isArray(arr)) arr = [arr];
     arr.forEach(child => {
-      if (typeof child === 'string') {
+      if (typeof child === 'string' || typeof child === 'number') {
         element.appendChild(document.createTextNode(child));
         return;
       }

@@ -13,16 +13,21 @@
     <script defer>
       document.addEventListener('DOMContentLoaded', () => {
         const title = 'test brochure';
-        // const testUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
-        const testUrl = './brochure/A17_FlightPlan.pdf';
+        const testUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+        // const testUrl = './brochure/A17_FlightPlan.pdf';
         const htmlElement = document.querySelector('.brocure');
         const workerSrc = './brochure/pdf.worker.js';
+        const pagination = {
+          show: true,
+          max: 10,
+        };
         const brocure = new window.__Brochure.default({
           contentType: 'pdf',
           data: testUrl,
           htmlNode: htmlElement,
           workerSrc,
           title,
+          pagination,
         });
         brocure.init();
       });
