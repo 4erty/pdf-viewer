@@ -312,7 +312,7 @@ class Brochure {
         pageNode.style.left = '50%';
       }
       this.book.appendChild(pageNode);
-      this.pageNodes.push(pageNode);
+      this.pageNodes[page] = pageNode;
     } catch (err) {
       console.log(err);
     }
@@ -365,6 +365,7 @@ class Brochure {
   renderPagination() {
     const max = this.pagination.max || 10;
     this.paginationNode = createElement('div', { class: 'brochure-pagination' });
+    this.paginationNode.style.width = this.bookWidth + 'px';
     const pagination = createElement('div', { class: 'pagination-numbers' });
     if (this.numPages > max) this.paginationNode.appendChild(createElement('div', { class: 'pagination-left' }, '<'));
     for (let i = 1; i <= this.numPages; i++) {
@@ -397,7 +398,7 @@ class Brochure {
    */
   paginationNumberClick(event) {
     const target = event.currentTarget;
-    if (target.classList.contains('pagination-active')) return;
+    if (event.type && target.classList.contains('pagination-active')) return;
     this.pageNodes[this.currentPage].removeAttribute('style');
     if (this.currentPage + 1 < this.numPages) this.pageNodes[this.currentPage + 1].removeAttribute('style');
     const pageNumber = parseFloat(target.getAttribute('data-page'));
@@ -430,22 +431,38 @@ class Brochure {
    */
   paginationLeft() {
     const displayedNumbers = [...this.paginationNode.querySelectorAll('.pagination-display')];
-    const last = displayedNumbers[displayedNumbers.length - 2];
-    const lastNumber = parseFloat(last.getAttribute('data-page'));
-    const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
-    if (secondNumber === 2) return;
-    if (secondNumber === 3) {
-      displayedNumbers[0].nextSibling.remove();
-      // last.nextSibling.classList.add('pagination-display');
-    } else {
-      last.classList.remove('pagination-display');
+    const active = this.paginationNode.querySelector('.pagination-active');
+    const activeNumber = parseFloat(active.getAttribute('data-page'));
+    if (activeNumber === 1) return;
 
+    active.classList.remove('pagination-active');
+    const fakeEvent = {};
+    const previous = active.previousSibling;
+    if (displayedNumbers.indexOf(previous) === -1) {
+      const last = displayedNumbers[displayedNumbers.length - 2];
+      const lastNumber = parseFloat(last.getAttribute('data-page'));
+      const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
+
+      if (secondNumber === 2) return;
+      if (secondNumber === 3) {
+        displayedNumbers[0].nextSibling.remove();
+        // last.nextSibling.classList.add('pagination-display');
+      } else {
+        last.classList.remove('pagination-display');
+      }
+
+      displayedNumbers[1].previousSibling.classList.add('pagination-display', 'pagination-active');
+      fakeEvent.currentTarget = displayedNumbers[1].previousSibling;
+      if (lastNumber === this.numPages - 1) {
+        last.after(createElement('div', { class: 'pagination-gap' }, '...'));
+        displayedNumbers[displayedNumbers.length - 3].classList.remove('pagination-display');
+      }
+    } else {
+      previous.classList.add('pagination-active');
+      fakeEvent.currentTarget = previous;
     }
-    displayedNumbers[1].previousSibling.classList.add('pagination-display');
-    if (lastNumber === this.numPages - 1) {
-      last.after(createElement('div', { class: 'pagination-gap' }, '...'));
-      displayedNumbers[displayedNumbers.length - 3].classList.remove('pagination-display');
-    }
+
+    this.paginationNumberClick(fakeEvent);
   }
 
   /**
@@ -453,22 +470,36 @@ class Brochure {
    */
   paginationRight() {
     const displayedNumbers = [...this.paginationNode.querySelectorAll('.pagination-display')];
-    const last = displayedNumbers[displayedNumbers.length - 2];
-    const lastNumber = parseFloat(last.getAttribute('data-page'));
-    const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
-    if (lastNumber === this.numPages - 1) return;
-    if (lastNumber === this.numPages - 2) {
-      displayedNumbers[displayedNumbers.length - 1].previousSibling.remove();
-      // displayedNumbers[1].previousSibling.classList.add('pagination-display');
+    const active = this.paginationNode.querySelector('.pagination-active');
+    const activeNumber = parseFloat(active.getAttribute('data-page'));
+    if (activeNumber === this.numPages) return;
+
+    active.classList.remove('pagination-active');
+    const fakeEvent = {};
+    const next = active.nextSibling;
+    if (displayedNumbers.indexOf(next) === -1) {
+      const last = displayedNumbers[displayedNumbers.length - 2];
+      const lastNumber = parseFloat(last.getAttribute('data-page'));
+      const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
+      if (lastNumber === this.numPages - 1) return;
+      if (lastNumber === this.numPages - 2) {
+        displayedNumbers[displayedNumbers.length - 1].previousSibling.remove();
+        // displayedNumbers[1].previousSibling.classList.add('pagination-display');
+      } else {
+        displayedNumbers[1].classList.remove('pagination-display');
+      }
+      last.nextSibling.classList.add('pagination-display', 'pagination-active');
+      fakeEvent.currentTarget = last.nextSibling;
+      if (secondNumber === 2) {
+        displayedNumbers[2].classList.remove('pagination-display');
+        displayedNumbers[0].after(createElement('div', { class: 'pagination-gap' }, '...'));
+      }
     } else {
-      displayedNumbers[1].classList.remove('pagination-display');
+      next.classList.add('pagination-active');
+      fakeEvent.currentTarget = next;
     }
 
-    last.nextSibling.classList.add('pagination-display');
-    if (secondNumber === 2) {
-      displayedNumbers[0].after(createElement('div', { class: 'pagination-gap' }, '...'));
-      displayedNumbers[2].classList.remove('pagination-display');
-    }
+    this.paginationNumberClick(fakeEvent);
   }
 
   /**
@@ -485,6 +516,7 @@ class Brochure {
    */
   async initPdf() {
     let rendered = false;
+    let renderedIndex = this.pagination.max || 10;
     start = performance.now();
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = this.workerSrc;
@@ -521,7 +553,7 @@ class Brochure {
         await page.render(renderContext);
         this.pages.push(page);
         this.pageContentNodes.push(canvas);
-        if (!rendered && i >= 10) {
+        if (!rendered && i >= renderedIndex) {
           this.render();
           rendered = true;
         }
