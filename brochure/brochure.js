@@ -96,7 +96,7 @@ var __Brochure =
 
 exports = module.exports = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js")(false);
 // Module
-exports.push([module.i, ".brochure {\n  box-sizing: border-box;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  position: relative;\n  margin: 24px;\n}\n\n.brochure-title {\n  box-sizing: border-box;\n  display: flex;\n  font-size: 24px;\n  line-height: 24px;\n  text-transform: uppercase;\n  margin: 0;\n  padding: 12px 0;\n}\n\n.brochure-book {\n  box-sizing: border-box;\n  position: relative;\n}\n\n.brochure-loading {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 160px;\n  height: 48px;\n  z-index: 3;\n}\n\n.brochure-page {\n  box-sizing: border-box;\n  border: 1px solid rgba(0, 0, 0, 0.1);\n  color: rgba(0, 0, 0, 0.1);\n  display: none;\n  position: absolute;\n  z-index: 1;\n  user-select: none;\n}\n\n.brochure-mainpage {\n  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);\n  left: 50%;\n}\n\n.brochure-mainpage::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  background-color: rgb(112,66,20, 0.06);\n  box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);\n}\n\n.brochure-mainpage::after {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 10px;\n  bottom: 0;\n  width: 3px;\n  background: rgba(0,0,0,0.06);\n  box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);\n}\n\n.brochure-lastpage {\n  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);\n  left: 0;\n}\n\n.brochure-lastpage::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  background-color: rgb(112,66,20, 0.06);\n  box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);\n}\n\n.brochure-lastpage::after {\n  content: '';\n  position: absolute;\n  top: 0;\n  right: 10px;\n  bottom: 0;\n  width: 3px;\n  background: rgba(0,0,0,0.06);\n  box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);\n}\n\n.brochure-image {\n  display: block;\n  max-width: 100%;\n  max-height: 100%;\n  user-select: none;\n}\n\n.move-right {\n  left: 0;\n  perspective-origin: 50% 0%;\n  transform-style: preserve-3d;\n  transform-origin: 100% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-right {\n  perspective-origin: 0% 50%;\n  transform-origin: 0% 50% 0px;\n  z-index: 2;\n}\n\n.move-left {\n  perspective-origin: 0% 50%;\n  transform-style: preserve-3d;\n  transform-origin: 0% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-left {\n  perspective-origin: 0% 50%;\n  transform-origin: 100% 50% 0px;\n  z-index: 2;\n}\n", ""]);
+exports.push([module.i, ".brochure {\n  box-sizing: border-box;\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-direction: column;\n      flex-direction: column;\n  -ms-flex-pack: center;\n      justify-content: center;\n  -ms-flex-align: center;\n      align-items: center;\n  position: relative;\n  margin: 24px;\n}\n\n.brochure-title {\n  box-sizing: border-box;\n  display: -ms-flexbox;\n  display: flex;\n  font-size: 24px;\n  line-height: 24px;\n  text-transform: uppercase;\n  margin: 0;\n  padding: 12px 0;\n}\n\n.brochure-book {\n  box-sizing: border-box;\n  position: relative;\n}\n\n.brochure-loading {\n  display: -ms-flexbox;\n  display: flex;\n  -ms-flex-pack: center;\n      justify-content: center;\n  -ms-flex-align: center;\n      align-items: center;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 160px;\n  height: 48px;\n  z-index: 3;\n}\n\n.brochure-pagination {\n  align-items: center;\n  display: flex;\n  margin-top: 24px;\n}\n\n.pagination-numbers {\n  box-sizing: border-box;\n  display: flex;\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  width: 100%;\n}\n\n.pagination,\n.pagination-gap,\n.pagination-right,\n.pagination-left {\n  flex-basis: 8.417%;\n  border-radius: 5px;\n  color: rgba(0, 0, 0, 0.87);\n  font-family: sans-serif;\n  font-size: 16px;\n  font-weight: 600;\n  line-height: 24px;\n  padding: 4px 2px;\n  margin: 6px 3px;\n  width: 32px;\n  height: 32px;\n  text-align: center;\n  vertical-align: middle;\n  user-select: none;\n  box-sizing: border-box;\n  transition: all 300ms ease-out;\n}\n\n.pagination {\n  cursor: pointer;\n  display: none;\n}\n\n.pagination-display {\n  display: block;\n}\n\n.pagination:hover,\n.pagination-right:hover,\n.pagination-left:hover {\n  background-color: rgba(0, 0, 0, 0.12); \n}\n\n.pagination-active {\n  background-color: #007bff;\n  color: #ffffff;\n}\n\n.pagination-active:hover {\n  background-color: #0056b3;\n}\n\n.brochure-page {\n  box-sizing: border-box;\n  border: 1px solid rgba(0, 0, 0, 0.1);\n  color: rgba(0, 0, 0, 0.1);\n  display: none;\n  position: absolute;\n  z-index: 1;\n  -ms-user-select: none;\n      user-select: none;\n}\n\n.brochure-mainpage {\n  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);\n  left: 50%;\n}\n\n.brochure-mainpage::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  background-color: rgb(112,66,20, 0.06);\n  box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);\n}\n\n.brochure-mainpage::after {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 10px;\n  bottom: 0;\n  width: 3px;\n  background: rgba(0,0,0,0.06);\n  box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);\n}\n\n.brochure-lastpage {\n  box-shadow: 10px 10px 30px rgba(0,0,0,0.3);\n  left: 0;\n}\n\n.brochure-lastpage::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  width: 100%;\n  background-color: rgb(112,66,20, 0.06);\n  box-shadow: inset 4px 0 10px rgba(0, 0, 0, 0.1);\n}\n\n.brochure-lastpage::after {\n  content: '';\n  position: absolute;\n  top: 0;\n  right: 10px;\n  bottom: 0;\n  width: 3px;\n  background: rgba(0,0,0,0.06);\n  box-shadow: 1px 0 3px rgba(255, 255, 255, 0.1);\n}\n\n.brochure-image {\n  display: block;\n  max-width: 100%;\n  max-height: 100%;\n  -ms-user-select: none;\n      user-select: none;\n}\n\n.move-right {\n  left: 0;\n  perspective-origin: 50% 0%;\n  transform-style: preserve-3d;\n  transform-origin: 100% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-right {\n  perspective-origin: 0% 50%;\n  transform-origin: 0% 50% 0px;\n  z-index: 2;\n}\n\n.move-left {\n  perspective-origin: 0% 50%;\n  transform-style: preserve-3d;\n  transform-origin: 0% 50% 0px;\n  backface-visibility: hidden;\n  z-index: 1;\n}\n\n.flip-left {\n  perspective-origin: 0% 50%;\n  transform-origin: 100% 50% 0px;\n  z-index: 2;\n}\n", ""]);
 
 
 
@@ -776,6 +776,7 @@ class Brochure {
     workerSrc = './brochure/pdf.worker.js',
     title = null,
     firstPageView = 'cover',
+    pagination = {},
     options = {},
   }) {
     this.url = data;
@@ -785,6 +786,7 @@ class Brochure {
     this.workerSrc = workerSrc;
     this.title = title;
     this.firstPageView = firstPageView;
+    this.pagination = pagination;
     this.book = null;
     this.pages = [];
     this.pageNodes = [];
@@ -805,10 +807,14 @@ class Brochure {
     this.flippedPageUnder = null;
     this.animationFrame = null;
     this.loading = null;
+    this.paginationNode = null;
 
     this.flipStart = this.flipStart.bind(this);
     this.flipMove = this.flipMove.bind(this);
     this.flipEnd = this.flipEnd.bind(this);
+    this.paginationNumberClick = this.paginationNumberClick.bind(this);
+    this.paginationLeft = this.paginationLeft.bind(this);
+    this.paginationRight = this.paginationRight.bind(this);
   }
 
   /**
@@ -986,22 +992,12 @@ class Brochure {
     this.pageNodes[this.currentPage].style.removeProperty('transform');
     this.pageNodes[this.currentPage].style.removeProperty('display');
 
-    // render next pages
-    if (this.firstPageView === 'cover' && this.move === 'right' && this.currentPage + 5 >= this.renderedPages) {
-      this.renderPage(this.currentPage + 5);
-      this.renderPage(this.currentPage + 6);
-      this.renderedPages += 2;
-    }
+    if (this.move === 'right' && this.currentPage + 6 >= this.renderedPages) this.renderNext(true);
 
-    // render next pages
-    if (this.firstPageView === 'spread' && this.move === 'right' && this.currentPage + 6 >= this.renderedPages) {
-      this.renderPage(this.currentPage + 6);
-      this.renderPage(this.currentPage + 7);
-      this.renderedPages += 2;
-    }
     // flip from cover
     if (this.currentPage === 0 && this.firstPageView === 'cover') {
       this.currentPage += 1;
+      if (this.pagination.show === true) this.paginationNumberChange();
       return;
     }
     // flip to cover
@@ -1012,12 +1008,12 @@ class Brochure {
         this.pageNodes[this.currentPage + 1].style.removeProperty('transform');
       }
       this.currentPage = 0;
-      return;
+      if (this.pagination.show === true) this.paginationNumberChange();
     }
     // flip to right
     if (this.move === 'right' && this.currentPage < this.numPages - 1) {
       this.currentPage += 2;
-      return;
+      if (this.pagination.show === true) this.paginationNumberChange();
     }
     // flip to left
     if (
@@ -1030,6 +1026,7 @@ class Brochure {
         this.pageNodes[this.currentPage + 1].style.removeProperty('transform');
       }
       this.currentPage -= 2;
+      if (this.pagination.show === true) this.paginationNumberChange();
     }
   }
 
@@ -1066,9 +1063,33 @@ class Brochure {
         pageNode.style.left = '50%';
       }
       this.book.appendChild(pageNode);
-      this.pageNodes.push(pageNode);
+      this.pageNodes[page] = pageNode;
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  /**
+   * render pages if needed
+   * @param {boolean} next - if next === true render next 2 pages, else render 6 pages around this.currentPage
+   */
+  renderNext(next) {
+    if (next === true) {
+      if (this.renderedPages < this.numPages) {
+        this.renderPage(this.renderedPages);
+        this.renderedPages += 1;
+      }
+      if (this.renderedPages < this.numPages) {
+        this.renderPage(this.renderedPages);
+        this.renderedPages += 1;
+      }
+      return;
+    }
+    let start = this.currentPage > 3 ? this.currentPage - 3 : this.currentPage;
+    let end = this.currentPage < this.numPages - 3 ? this.currentPage + 3 : this.numPages;
+    if (end <= start) return;
+    for (let i = start; i < end; i++) {
+      if (!this.pageNodes[i] && i < this.numPages) this.renderPage(i);
     }
   }
 
@@ -1084,8 +1105,161 @@ class Brochure {
     end = performance.now();
     console.log(`render pdf took ${startRender - start} milliseconds.`);
     console.log(`render html took ${end - startRender} milliseconds.`);
+    if (this.pagination.show === true) this.renderPagination();
     this.book.addEventListener(events.start, this.flipStart);
     this.el.removeChild(this.loading);
+  }
+
+  /**
+   * render pagination to the book
+   */
+  renderPagination() {
+    const max = this.pagination.max || 10;
+    this.paginationNode = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'brochure-pagination' });
+    this.paginationNode.style.width = this.bookWidth + 'px';
+    const pagination = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'pagination-numbers' });
+    if (this.numPages > max) this.paginationNode.appendChild(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'pagination-left' }, '<'));
+    for (let i = 1; i <= this.numPages; i++) {
+      let node = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'pagination pagination-display', 'data-page': i }, i);
+      if (i === 1) node.classList.add('pagination-active');
+      if (i > max - 2) node.classList.remove('pagination-display');
+      if (i === this.numPages && this.numPages > max) {
+        pagination.appendChild(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'pagination-gap' }, '...'));
+        node.classList.add('pagination-display');
+      }
+      pagination.appendChild(node);
+    }
+
+    this.paginationNode.appendChild(pagination);
+    if (this.numPages > max) this.paginationNode.appendChild(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'pagination-right' }, '>'));
+
+    this.el.appendChild(this.paginationNode);
+    [...this.el.querySelectorAll('.pagination')].forEach(el => {
+      el.addEventListener('click', this.paginationNumberClick);
+    });
+    if (this.numPages > max) {
+      this.paginationNode.querySelector('.pagination-left').addEventListener('click', this.paginationLeft);
+      this.paginationNode.querySelector('.pagination-right').addEventListener('click', this.paginationRight);
+    }
+  }
+
+  /**
+   * click on pagination page number
+   * @param {MouseEvent} event - mouse click event
+   */
+  paginationNumberClick(event) {
+    const target = event.currentTarget;
+    if (event.type && target.classList.contains('pagination-active')) return;
+    this.pageNodes[this.currentPage].removeAttribute('style');
+    if (this.currentPage + 1 < this.numPages) this.pageNodes[this.currentPage + 1].removeAttribute('style');
+    const pageNumber = parseFloat(target.getAttribute('data-page'));
+    this.el.querySelector('.pagination-active').classList.remove('pagination-active');
+    target.classList.add('pagination-active');
+    this.currentPage = pageNumber % 2 === 0 ? pageNumber - 1 : pageNumber - 2;
+    if (this.currentPage < 0) this.currentPage = 0;
+    this.renderNext();
+    if (this.currentPage === 0 && this.firstPageView === 'cover') {
+      Object.assign(this.pageNodes[this.currentPage].style, {
+        display: 'flex',
+        left: '50%',
+      });
+    } else {
+      Object.assign(this.pageNodes[this.currentPage].style, {
+        display: 'flex',
+        transform: 'perspective(2000px) rotateY(0deg)',
+      });
+      if (this.currentPage + 1 < this.numPages) {
+        Object.assign(this.pageNodes[this.currentPage + 1].style, {
+          left: '50%',
+          display: 'flex',
+        });
+      }
+    }
+  }
+
+  /**
+   * pagination left arrow click handler
+   */
+  paginationLeft() {
+    const displayedNumbers = [...this.paginationNode.querySelectorAll('.pagination-display')];
+    const active = this.paginationNode.querySelector('.pagination-active');
+    const activeNumber = parseFloat(active.getAttribute('data-page'));
+    if (activeNumber === 1) return;
+
+    active.classList.remove('pagination-active');
+    const fakeEvent = {};
+    const previous = active.previousSibling;
+    if (displayedNumbers.indexOf(previous) === -1) {
+      const last = displayedNumbers[displayedNumbers.length - 2];
+      const lastNumber = parseFloat(last.getAttribute('data-page'));
+      const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
+
+      if (secondNumber === 2) return;
+      if (secondNumber === 3) {
+        displayedNumbers[0].nextSibling.remove();
+        // last.nextSibling.classList.add('pagination-display');
+      } else {
+        last.classList.remove('pagination-display');
+      }
+
+      displayedNumbers[1].previousSibling.classList.add('pagination-display', 'pagination-active');
+      fakeEvent.currentTarget = displayedNumbers[1].previousSibling;
+      if (lastNumber === this.numPages - 1) {
+        last.after(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'pagination-gap' }, '...'));
+        displayedNumbers[displayedNumbers.length - 3].classList.remove('pagination-display');
+      }
+    } else {
+      previous.classList.add('pagination-active');
+      fakeEvent.currentTarget = previous;
+    }
+
+    this.paginationNumberClick(fakeEvent);
+  }
+
+  /**
+   * pagination right arrow click handler
+   */
+  paginationRight() {
+    const displayedNumbers = [...this.paginationNode.querySelectorAll('.pagination-display')];
+    const active = this.paginationNode.querySelector('.pagination-active');
+    const activeNumber = parseFloat(active.getAttribute('data-page'));
+    if (activeNumber === this.numPages) return;
+
+    active.classList.remove('pagination-active');
+    const fakeEvent = {};
+    const next = active.nextSibling;
+    if (displayedNumbers.indexOf(next) === -1) {
+      const last = displayedNumbers[displayedNumbers.length - 2];
+      const lastNumber = parseFloat(last.getAttribute('data-page'));
+      const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
+      if (lastNumber === this.numPages - 1) return;
+      if (lastNumber === this.numPages - 2) {
+        displayedNumbers[displayedNumbers.length - 1].previousSibling.remove();
+        // displayedNumbers[1].previousSibling.classList.add('pagination-display');
+      } else {
+        displayedNumbers[1].classList.remove('pagination-display');
+      }
+      last.nextSibling.classList.add('pagination-display', 'pagination-active');
+      fakeEvent.currentTarget = last.nextSibling;
+      if (secondNumber === 2) {
+        displayedNumbers[2].classList.remove('pagination-display');
+        displayedNumbers[0].after(Object(_utils__WEBPACK_IMPORTED_MODULE_1__["createElement"])('div', { class: 'pagination-gap' }, '...'));
+      }
+    } else {
+      next.classList.add('pagination-active');
+      fakeEvent.currentTarget = next;
+    }
+
+    this.paginationNumberClick(fakeEvent);
+  }
+
+  /**
+   * change active pagination number when flip page
+   */
+  paginationNumberChange() {
+    const pageNumber = this.currentPage + 1;
+    this.el.querySelector('.pagination-active').classList.remove('pagination-active');
+    this.el.querySelector(`[data-page="${pageNumber}"]`).classList.add('pagination-active');
   }
 
   /**
@@ -1093,6 +1267,7 @@ class Brochure {
    */
   async initPdf() {
     let rendered = false;
+    let renderedIndex = this.pagination.max || 10;
     start = performance.now();
     const pdfjsLib = window['pdfjs-dist/build/pdf'];
     pdfjsLib.GlobalWorkerOptions.workerSrc = this.workerSrc;
@@ -1129,7 +1304,7 @@ class Brochure {
         await page.render(renderContext);
         this.pages.push(page);
         this.pageContentNodes.push(canvas);
-        if (!rendered && i >= 10) {
+        if (!rendered && i >= renderedIndex) {
           this.render();
           rendered = true;
         }
@@ -1139,7 +1314,7 @@ class Brochure {
     }
     if (!rendered) this.render();
     endRender = performance.now();
-    console.log(`render all html took ${endRender - startRender} milliseconds.`);
+    console.log(`render all html took ${endRender - start} milliseconds.`);
   }
 
   /**
@@ -1213,7 +1388,7 @@ const createElement = (tagName, attributes, children) => {
     let arr = children;
     if (!Array.isArray(arr)) arr = [arr];
     arr.forEach(child => {
-      if (typeof child === 'string') {
+      if (typeof child === 'string' || typeof child === 'number') {
         element.appendChild(document.createTextNode(child));
         return;
       }
