@@ -19,9 +19,9 @@ let endRender = 0;
 
 class Brochure {
   constructor({
-    contentType,
-    data,
-    htmlNode,
+    contentType = '',
+    data = '',
+    htmlNode = null,
     workerSrc = './brochure/pdf.worker.js',
     title = null,
     firstPageView = 'cover',
@@ -43,8 +43,8 @@ class Brochure {
     this.currentPage = 0;
     this.numPages = 0;
     this.renderedPages = 0;
-    this.width = htmlNode.getBoundingClientRect().width;
-    this.height = options.height && options.height.value ? options.height.value : 480;
+    this.width = 0;
+    this.height = 0;
     this.posX = 0;
     this.posY = 0;
     this.bookWidth = 0;
@@ -591,6 +591,11 @@ class Brochure {
    * initialisation
    */
   init() {
+    if (!(this.el instanceof Element)) throw new Error('Empty DOM node to create brochure');
+
+    this.width = this.el.getBoundingClientRect().width;
+    this.height = this.options.height ? this.options.height : 480;
+
     this.el.classList.add('brochure');
     if (this.title !== null) {
       this.el.appendChild(createElement('h2', { class: 'brochure-title' }, this.title));
