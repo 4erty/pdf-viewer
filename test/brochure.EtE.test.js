@@ -1,3 +1,6 @@
+/**
+ * End to end tests to brochure
+ */
 'use strict';
 const path = require('path');
 const puppeteer = require('puppeteer');
@@ -11,6 +14,9 @@ const compiler = webpack(config);
 const timeout = 50000;
 let browser;
 let page;
+
+// const for brochure options in index.html;
+const paginationMax = 10;
 
 app.use(middleware(compiler, { publicPath: config.output.publicPath }));
 app.use('/brochure', express.static(path.join(__dirname, '../brochure')));
@@ -38,8 +44,8 @@ describe('on Brochure loaded', () => {
     browser.close();
   });
 
-  test('load 10 pages', async () => {
-    await page.waitForSelector('[data-pagenum="9"] > canvas');
+  test(`load ${paginationMax} pages`, async () => {
+    await page.waitForSelector(`[data-pagenum="${paginationMax - 1}"] > canvas`);
   }, timeout);
 
   test('after pagination right click - display 2 pages with className === "brochure-page"', async () => {
@@ -47,9 +53,27 @@ describe('on Brochure loaded', () => {
     const pages = await page.$$eval('.brochure-page', pageNodes => {
       return pageNodes.filter(page => page.style.display === 'flex').map(page => page.className);
     });
-    console.log(pages[1]);
     expect(pages).toHaveLength(2);
     expect(pages[0]).toBe('brochure-page');
     expect(pages[1]).toBe('brochure-page');
+  }, timeout);
+
+
+  test('after click on last pagination number and then left - correct displaying pagination', async () => {
+    const max = paginationMax - 2;
+    let buttons = await page.$$eval('.pagination', pageNodes => {
+      return pageNodes.map(page => page.getAttribute('data-page'));
+    });
+    buttons = buttons.filter(index => index === '1' || index > buttons.length - max);
+    const lastButton = await page.$$eval('.pagination-display', pageNodes => pageNodes[pageNodes.length - 1].getAttribute('data-page'));
+    await page.click(`[data-page="${lastButton}"]`);
+    const lastPage = await page.$$eval('.brochure-page', pageNodes => {
+      return pageNodes.filter(page => page.style.display === 'flex').map(page => page.className)[0];
+    });
+
+    expect(lastPage).toContain('brochure-lastpage');
+    await page.click('.pagination-left');
+    const newButtons = await page.$$eval('.pagination-display', pageNodes => pageNodes.map(page => page.getAttribute('data-page')));
+    expect(newButtons).toEqual(buttons);
   }, timeout);
 });
