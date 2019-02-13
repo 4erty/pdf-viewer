@@ -1,21 +1,38 @@
 'use strict';
-
 import './brochure.css';
 
 import { createElement } from '../utils';
 
+// check if has touch events
 const isTouch = 'ontouchstart' in window;
 
+// if isTouch - use touch events else use mouse events
 const events = isTouch
   ? { start: 'touchstart', move: 'touchmove', end: 'touchend' }
   : { start: 'mousedown', move: 'mousemove', end: 'mouseup' };
 
 const TITLE_HEIGHT = 48; // css font-size + padding + margin for class brochure-title
 
+// variables to calculate performance
 let start = 0;
 let startRender = 0;
 let end = 0;
 let endRender = 0;
+
+/**
+ * Represents a brochure.
+ * @constructor
+ * @param {string} contentType - select 'pdf' or 'page' to render pdf or images.
+ * @param {(string|string[])} data - url to pdf or array of url to images.
+ * @param {DOMElement} htmlNode  - DOMElement to render brochure
+ * @param {string} workerSrc - path to pdfWorker.js
+ * @param {string} [title] - title of brochure, if needed
+ * @param {string} [firstPageView=cover] - 'cover' or 'spread' to display first page
+ * @param {Object} [pagination={}] - pagination parameters
+ * @param {boolean} [pagination.show] - show pagination or not
+ * @param {number} [pagination.max=10] - maximum pages in pagination
+ * @param {boolean} [pageNumberInput=false] - show manual page number input or not
+ */
 
 class Brochure {
   constructor({
@@ -26,6 +43,7 @@ class Brochure {
     title = null,
     firstPageView = 'cover',
     pagination = {},
+    pageNumberInput = false,
     options = {},
   }) {
     this.url = data;
@@ -36,6 +54,7 @@ class Brochure {
     this.title = title;
     this.firstPageView = firstPageView;
     this.pagination = pagination;
+    this.pageNumberInput = pageNumberInput;
     this.book = null;
     this.pages = [];
     this.pageNodes = [];
@@ -56,7 +75,10 @@ class Brochure {
     this.flippedPageUnder = null;
     this.animationFrame = null;
     this.loading = null;
+    this.controls = null;
     this.paginationNode = null;
+    this.pageInput = null;
+    this.pageInputNumber = '1';
 
     this.flipStart = this.flipStart.bind(this);
     this.flipMove = this.flipMove.bind(this);
@@ -64,6 +86,7 @@ class Brochure {
     this.paginationNumberClick = this.paginationNumberClick.bind(this);
     this.paginationLeft = this.paginationLeft.bind(this);
     this.paginationRight = this.paginationRight.bind(this);
+    this.pageNumberChange = this.pageNumberChange.bind(this);
   }
 
   /**
@@ -272,6 +295,7 @@ class Brochure {
       if (this.move === 'right') this.paginationRight(null, true);
       if (this.move === 'left') this.paginationLeft(null, true);
     }
+    if (this.pageNumberInput === true) this.pageInput.querySelector('input').setAttribute('value', this.currentPage + 1);
   }
 
   /**
@@ -320,17 +344,17 @@ class Brochure {
   renderNext(next) {
     if (next === true) {
       if (
-        this.renderedPages < this.numPages - 1
+        this.renderedPages < this.numPages
         && this.pageNodes[this.renderedPages + 1] === undefined
       ) {
-        this.renderPage(this.renderedPages + 1);
+        this.renderPage(this.renderedPages);
         this.renderedPages += 1;
       }
       if (
-        this.renderedPages < this.numPages - 1
+        this.renderedPages < this.numPages
         && this.pageNodes[this.renderedPages + 1] === undefined
       ) {
-        this.renderPage(this.renderedPages + 1);
+        this.renderPage(this.renderedPages);
         this.renderedPages += 1;
       }
       return;
@@ -355,7 +379,13 @@ class Brochure {
     end = performance.now();
     console.log(`render pdf took ${startRender - start} milliseconds.`);
     console.log(`render html took ${end - startRender} milliseconds.`);
+    if (this.pagination.show === true || this.pageNumberInput === true) {
+      this.controls = createElement('div', { class: 'brochure-control' });
+      this.controls.style.width = this.bookWidth + 'px';
+      this.el.appendChild(this.controls);
+    }
     if (this.pagination.show === true) this.renderPagination();
+    if (this.pageNumberInput === true) this.renderManualInput();
     this.book.addEventListener(events.start, this.flipStart);
     this.el.removeChild(this.loading);
   }
@@ -366,7 +396,6 @@ class Brochure {
   renderPagination() {
     const max = this.pagination.max || 10;
     this.paginationNode = createElement('div', { class: 'brochure-pagination' });
-    this.paginationNode.style.width = this.bookWidth + 'px';
     const pagination = createElement('div', { class: 'pagination-numbers' });
     if (this.numPages > max) this.paginationNode.appendChild(createElement('div', { class: 'pagination-left' }, '<'));
     for (let i = 1; i <= this.numPages; i++) {
@@ -383,8 +412,8 @@ class Brochure {
     this.paginationNode.appendChild(pagination);
     if (this.numPages > max) this.paginationNode.appendChild(createElement('div', { class: 'pagination-right' }, '>'));
 
-    this.el.appendChild(this.paginationNode);
-    [...this.el.querySelectorAll('.pagination')].forEach(el => {
+    this.controls.appendChild(this.paginationNode);
+    [...this.paginationNode.querySelectorAll('.pagination')].forEach(el => {
       el.addEventListener('click', this.paginationNumberClick);
     });
     if (this.numPages > max) {
@@ -394,17 +423,78 @@ class Brochure {
   }
 
   /**
+   * render manual page number input
+   */
+  renderManualInput() {
+    const inputNode = createElement(
+      'div',
+      { class: 'inputWrapper' },
+      createElement('input', { type: 'text', class: 'inputPage', value: this.currentPage + 1 }),
+    );
+    const totalNode = createElement('div', { class: 'inputTotal' });
+    totalNode.textContent = `/ ${this.numPages}`;
+    this.pageInput = createElement('div', { class: 'brochure-pageInput' });
+    this.pageInput.appendChild(inputNode);
+    this.pageInput.appendChild(totalNode);
+    this.controls.appendChild(this.pageInput);
+    this.pageInput.querySelector('input').addEventListener('keydown', this.pageNumberChange);
+  }
+
+  pageNumberChange(event) {
+    const validKeys = ['ArrowRight', 'ArrowLeft', 'Backspace', 'Enter'];
+    event.preventDefault();
+    const key = event.key;
+    const isNumber = /^[0-9]$/i.test(key);
+    if (!isNumber && validKeys.indexOf(key) === -1) return;
+    const node = this.pageInput.querySelector('input');
+    const pos = node.selectionStart;
+    let value = this.pageInputNumber;
+    switch (key) {
+      case 'Enter':
+        this.pageNumberEnter();
+        return;
+      case 'ArrowLeft':
+        node.setSelectionRange(pos - 1, pos - 1);
+        return;
+      case 'ArrowRight':
+        node.setSelectionRange(pos + 1, pos + 1);
+        return;
+      case 'Backspace':
+        value = value.slice(0, -1);
+        break;
+      default:
+        value += key;
+    }
+
+    const pageNumber = parseInt(value, 10);
+    if (pageNumber > this.numPages) return;
+    this.pageInputNumber = value;
+    node.setAttribute('value', this.pageInputNumber);
+    node.setSelectionRange(this.pageInputNumber.length, this.pageInputNumber.length);
+  }
+
+  pageNumberEnter() {
+    const pageNumber = parseInt(this.pageInputNumber, 10);
+    if (pageNumber > this.numPages || pageNumber < 0 || isNaN(pageNumber)) return;
+    this.changePage(pageNumber);
+  }
+
+  /**
    * click on pagination page number
    * @param {MouseEvent} event - mouse click event
    */
   paginationNumberClick(event) {
     const target = event.currentTarget;
     if (event.type && target.classList.contains('pagination-active')) return;
-    this.pageNodes[this.currentPage].removeAttribute('style');
-    if (this.currentPage + 1 < this.numPages) this.pageNodes[this.currentPage + 1].removeAttribute('style');
     const pageNumber = parseFloat(target.getAttribute('data-page'));
     this.el.querySelector('.pagination-active').classList.remove('pagination-active');
     target.classList.add('pagination-active');
+    this.changePage(pageNumber);
+  }
+
+  changePage(pageNumber) {
+    this.pageNodes[this.currentPage].removeAttribute('style');
+    if (this.currentPage + 1 < this.numPages) this.pageNodes[this.currentPage + 1].removeAttribute('style');
     this.currentPage = pageNumber % 2 === 0 ? pageNumber - 1 : pageNumber - 2;
     if (this.currentPage < 0) this.currentPage = 0;
     this.renderNext();
@@ -425,6 +515,7 @@ class Brochure {
         });
       }
     }
+    if (this.pageNumberInput === true) this.pageInput.querySelector('input').setAttribute('value', pageNumber);
   }
 
   /**
@@ -469,7 +560,7 @@ class Brochure {
         if (flip) displayedNumbers[displayedNumbers.length - 2].classList.remove('pagination-display');
       } else {
         last.classList.remove('pagination-display');
-        if (flip) last.previousSibling.remove('pagination-display');
+        if (flip) last.previousSibling.classList.remove('pagination-display');
       }
 
       previous.classList.add('pagination-display', 'pagination-active');
