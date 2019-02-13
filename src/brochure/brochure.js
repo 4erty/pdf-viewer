@@ -32,6 +32,7 @@ let endRender = 0;
  * @param {boolean} [pagination.show] - show pagination or not
  * @param {number} [pagination.max=10] - maximum pages in pagination
  * @param {boolean} [pageNumberInput=false] - show manual page number input or not
+ * @param {boolean} [saveLastSeenPage=false] - save last seen page
  */
 
 class Brochure {
@@ -44,6 +45,7 @@ class Brochure {
     firstPageView = 'cover',
     pagination = {},
     pageNumberInput = false,
+    saveLastSeenPage = false,
     options = {},
   }) {
     this.url = data;
@@ -55,6 +57,7 @@ class Brochure {
     this.firstPageView = firstPageView;
     this.pagination = pagination;
     this.pageNumberInput = pageNumberInput;
+    this.saveLastSeenPage = saveLastSeenPage;
     this.book = null;
     this.pages = [];
     this.pageNodes = [];
@@ -296,6 +299,7 @@ class Brochure {
       if (this.move === 'left') this.paginationLeft(null, true);
     }
     if (this.pageNumberInput === true) this.pageInput.querySelector('input').setAttribute('value', this.currentPage + 1);
+    if (this.saveLastSeenPage === true) localStorage.setItem('saveLastSeenPage', this.currentPage);
   }
 
   /**
@@ -388,6 +392,14 @@ class Brochure {
     if (this.pageNumberInput === true) this.renderManualInput();
     this.book.addEventListener(events.start, this.flipStart);
     this.el.removeChild(this.loading);
+    if (this.saveLastSeenPage === true) {
+      const pageNumber = parseInt(localStorage.getItem('saveLastSeenPage'), 10) + 1;
+      this.changePage(pageNumber);
+      if (this.pagination.show === true) {
+        this.paginationNode.querySelector('[data-page="1"]').classList.remove('pagination-active');
+        this.paginationNode.querySelector(`[data-page="${pageNumber}"]`).classList.add('pagination-active');
+      }
+    }
   }
 
   /**
@@ -516,6 +528,7 @@ class Brochure {
       }
     }
     if (this.pageNumberInput === true) this.pageInput.querySelector('input').setAttribute('value', pageNumber);
+    if (this.saveLastSeenPage === true) localStorage.setItem('saveLastSeenPage', this.currentPage);
   }
 
   /**
@@ -576,6 +589,7 @@ class Brochure {
     }
 
     if (!flip) this.paginationNumberClick(fakeEvent);
+    if (this.saveLastSeenPage === true) localStorage.setItem('saveLastSeenPage', this.currentPage);
   }
 
   /**
@@ -634,6 +648,7 @@ class Brochure {
     }
 
     if (!flip) this.paginationNumberClick(fakeEvent);
+    if (this.saveLastSeenPage === true) localStorage.setItem('saveLastSeenPage', this.currentPage);
   }
 
   /**
