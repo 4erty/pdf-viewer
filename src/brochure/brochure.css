@@ -91,6 +91,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
+  align-items: baseline;
   width: 100%;
 }
 
@@ -152,7 +153,6 @@
 
 .brochure-mainpage {
   box-shadow: 10px 10px 30px rgba(0,0,0,0.3);
-  left: 50%;
 }
 
 .brochure-mainpage::before {

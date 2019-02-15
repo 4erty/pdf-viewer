@@ -211,7 +211,7 @@
 		"func-name-matching": ["off", "always", {
       "includeCommonJSModuleExports": false
 		}],
-		"func-names": "warn",
+		"func-names": ["error", "as-needed"],
 		"func-style": ["off", "expression"],
 		"function-paren-newline": ["error", "consistent"],
 		"id-blacklist": "off",
