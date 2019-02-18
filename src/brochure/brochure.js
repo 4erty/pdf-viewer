@@ -102,22 +102,53 @@ class Brochure {
     return true;
   }
 
+  /**
+   * current page change handler
+   * @param {number} page - new page number from 1
+   */
   currentPageChanged(page) {
     const dispalyedPages = [...this.book.querySelectorAll('.brochure-page')].filter(page => page.style.display === 'flex');
     const pageNumber = parseInt(dispalyedPages[0].getAttribute('data-pagenum'), 10);
+    if (page < 0 || page >= this.numPages) {
+      console.log('[currentPageChanged]: Incorrect page number');
+      return;
+    }
     // check if need to render pages
     if (page + 4 >= this.renderedPages) this.renderNext();
     // check if display correct pages
     if (page !== pageNumber) {
       dispalyedPages.forEach(page => { page.removeAttribute('style'); });
-      this.book.querySelector(`[data-pagenum="${page}"]`).style.display = 'flex';
-      Object.assign(this.book.querySelector(`[data-pagenum="${page + 1}"]`).style, {
-        display: 'flex',
-        left: '50%',
-      });
+      if (page >= 1) this.book.querySelector(`[data-pagenum="${page}"]`).style.display = 'flex';
+      if (page < this.numPages - 1) {
+        const mainPage = this.firstPageView === 'cover' && page === 0;
+        Object.assign(this.book.querySelector(`[data-pagenum="${mainPage ? page : page + 1}"]`).style, {
+          display: 'flex',
+          left: '50%',
+        });
+      }
     }
     // check pagination
     if (this.pagination.show === true) this.paginationNumberChange(page);
+  }
+
+  /**
+   *  help function to convert page number to possible numbers
+   * @param {number} pageNumber page numbers from 1
+   * @returns {number} - possble number to current page
+   */
+  convertPageNumber(pageNumber) {
+    if (this.firstPageView === 'cover') {
+      let page = pageNumber % 2 === 0
+        ? pageNumber - 1
+        : pageNumber - 2;
+      if (page < 0) page = 0;
+      return page;
+    }
+    let page = pageNumber % 2 === 0
+      ? pageNumber
+      : pageNumber - 1;
+    if (page < 0) page = 0;
+    return page;
   }
 
   paginationNumberChange(page) {
@@ -125,79 +156,131 @@ class Brochure {
     const active = this.paginationNode.querySelector('.pagination-active');
     const activeNumber = parseInt(active.getAttribute('data-page'), 10);
     const move = pageNumber > activeNumber ? 'right' : 'left';
-    const diff = Math.abs(pageNumber - activeNumber);
     if (activeNumber !== pageNumber) {
       const pagination = this.paginationNode.querySelector(`[data-page="${pageNumber}"]`);
       pagination.classList.add('pagination-active');
       active.classList.remove('pagination-active');
-      if (pagination.classList.contains('pagination-display') && pageNumber !== this.numPages) return;
-      const first = this.paginationNode.querySelector('[data-page="1"]');
-      const last = this.paginationNode.querySelector(`[data-page="${this.numPages}"]`);
-      if (move === 'right' && !first.nextSibling.classList.contains('pagination-gap')) {
-        first.nextSibling.classList.remove('pagination-display');
-        first.after(createElement('div', { class: 'pagination-gap' }, '...'));
-      }
-      const step = this.pagination.max - 4;
-      const add = move === 'right' ? activeNumber : pageNumber - 1;
-      const remove = move === 'right' ? activeNumber - step : activeNumber + step - 3;
-      for (let i = 1; i <= diff; i++) {
-        let addNode = this.paginationNode.querySelector(`[data-page="${add + i}"]`);
-        if (addNode) addNode.classList.add('pagination-display');
-        if (add + i === this.numPages) break;
-        let removeNode = this.paginationNode.querySelector(`[data-page="${remove + i}"]`);
-        if (removeNode) removeNode.classList.remove('pagination-display');
-      }
-      if (move === 'right' && pageNumber >= this.numPages - 1) {
-        last.previousSibling.remove();
-        let addNode = this.paginationNode.querySelector(`[data-page="${this.numPages + 3 - this.pagination.max}"]`);
-        if (addNode) addNode.classList.add('pagination-display');
-      }
+      if (pagination.classList.contains('pagination-display') && pageNumber !== this.numPages && pageNumber !== 1) return;
+
+      this.paginationRerender(page, move);
     }
   }
 
-  startAnimation() {
-    const start = performance.now();
-    const duration = 600;
+  paginationRerender(page, move) {
+    const pages = [...this.paginationNode.querySelectorAll('.pagination')];
+    const max = this.pagination.max - 4;
+    let start = move === 'right' ? page - max + 1 : page - 1;
+    let end = move === 'right' ? page + 1 : page + max - 1;
+    const length = this.numPages;
+    const first = this.paginationNode.querySelector('[data-page="1"]');
+    const last = this.paginationNode.querySelector(`[data-page="${this.numPages}"]`);
+    if (!first.nextSibling.classList.contains('pagination-gap') && page > 1) first.after(createElement('div', { class: 'pagination-gap' }, '...'));
+    if (page === 0 && first.nextSibling.classList.contains('pagination-gap')) {
+      first.nextSibling.remove();
+      end += 3;
+    }
+    if (!last.previousSibling.classList.contains('pagination-gap')) last.before(createElement('div', { class: 'pagination-gap' }, '...'));
+    if (page === length - 1 && last.previousSibling.classList.contains('pagination-gap')) {
+      last.previousSibling.remove();
+      start -= 2;
+    }
 
-    const animate = (time) => {
-      let timePassed = time - start;
-
-      if (timePassed > duration) timePassed = duration;
-
-      this.flipAnimation(timePassed, duration);
-
-      if (timePassed < duration && this.animationFrame !== null) {
-        this.animationFrame = requestAnimationFrame(animate);
+    pages.forEach((page, index) => {
+      if (
+        index === 0
+        || index === length - 1
+        || (index >= start && index < end)) {
+        page.classList.add('pagination-display');
+        return;
       }
-    };
-
-    this.animationFrame = requestAnimationFrame(animate);
+      page.classList.remove('pagination-display');
+    });
   }
 
-  flipAnimation(timePassed, duration) {
-    const frame = timePassed > 0 ? Math.round(1000 * (90 / duration) * timePassed) / 1000 : 0;
+  /**
+   * click on pagination page number
+   * @param {MouseEvent} event - mouse click event
+   */
+  paginationNumberClick(event) {
+    const target = event.currentTarget;
+    if (event.type && target.classList.contains('pagination-active')) return;
+    const pageNumber = parseInt(target.getAttribute('data-page'), 10);
+    this.pageState.currentPage = this.convertPageNumber(pageNumber);
+  }
 
-    if (this.move === 'right' && this.angle < 90) {
-      this.angle -= frame;
-      this.flippedPage.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
+  /**
+   * pagination left arrow click handler
+   */
+  paginationLeft() {
+    const pageNumber = this.pageState.currentPage + 1;
+    if (pageNumber === 1) return;
+    if (
+      this.firstPageView === 'cover' && pageNumber === 2) {
+      this.pageState.currentPage = this.pageState.currentPage - 1;
+      return;
     }
-    if (this.move === 'right' && this.angle >= 90) {
-      this.flippedPageBack.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
-      this.angle += frame;
+    this.pageState.currentPage = this.pageState.currentPage - 2;
+  }
+
+  /**
+   * pagination right arrow click handler
+   */
+  paginationRight() {
+    const pageNumber = this.pageState.currentPage + 1;
+    if (pageNumber === this.numPages) return;
+    if (
+      this.firstPageView === 'cover'
+      && (pageNumber === 1 || pageNumber === this.numPages)) {
+      this.pageState.currentPage = this.pageState.currentPage + 1;
+      return;
     }
-    if (this.move === 'left' && this.angle >= 90) {
-      this.flippedPage.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
-      this.angle += frame;
+    this.pageState.currentPage = this.pageState.currentPage + 2;
+  }
+
+  /**
+   * number change handler for manual page number input
+   * @param {KeyboardEvent} event - key down event object
+   */
+  pageNumberChange(event) {
+    const validKeys = ['ArrowRight', 'ArrowLeft', 'Backspace', 'Enter'];
+    event.preventDefault();
+    const key = event.key;
+    const isNumber = /^[0-9]$/i.test(key);
+    if (!isNumber && validKeys.indexOf(key) === -1) return;
+    const node = this.pageInput.querySelector('input');
+    const pos = node.selectionStart;
+    let value = this.pageInputNumber;
+    switch (key) {
+      case 'Enter':
+        this.pageNumberEnter();
+        return;
+      case 'ArrowLeft':
+        node.setSelectionRange(pos - 1, pos - 1);
+        return;
+      case 'ArrowRight':
+        node.setSelectionRange(pos + 1, pos + 1);
+        return;
+      case 'Backspace':
+        value = value.slice(0, -1);
+        break;
+      default:
+        value += key;
     }
-    if (this.move === 'left' && this.angle < 90) {
-      this.flippedPageBack.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
-      this.angle -= frame;
-    }
-    if (this.angle >= 180 || this.angle <= 0) {
-      cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = null;
-      this.flipEnd();
-    }
+
+    const pageNumber = parseInt(value, 10);
+    if (pageNumber > this.numPages) return;
+    this.pageInputNumber = value;
+    node.setAttribute('value', this.pageInputNumber);
+    node.setSelectionRange(this.pageInputNumber.length, this.pageInputNumber.length);
+  }
+
+  /**
+   * enter key pressed handler for manual page number input
+   */
+  pageNumberEnter() {
+    const pageNumber = parseInt(this.pageInputNumber, 10);
+    if (pageNumber > this.numPages || pageNumber < 0 || isNaN(pageNumber)) return;
+    this.pageState.currentPage = this.convertPageNumber(pageNumber);
   }
 
   /**
@@ -270,6 +353,10 @@ class Brochure {
     }
   }
 
+  /**
+   * start flip
+   * @param {event} event - mouse event
+   */
   flip(event) {
     this.fsm.dispatch('check', this, event);
   }
@@ -356,205 +443,6 @@ class Brochure {
     this.pageInput.appendChild(totalNode);
     this.controls.appendChild(this.pageInput);
     this.pageInput.querySelector('input').addEventListener('keydown', this.pageNumberChange);
-  }
-
-  pageNumberChange(event) {
-    const validKeys = ['ArrowRight', 'ArrowLeft', 'Backspace', 'Enter'];
-    event.preventDefault();
-    const key = event.key;
-    const isNumber = /^[0-9]$/i.test(key);
-    if (!isNumber && validKeys.indexOf(key) === -1) return;
-    const node = this.pageInput.querySelector('input');
-    const pos = node.selectionStart;
-    let value = this.pageInputNumber;
-    switch (key) {
-      case 'Enter':
-        this.pageNumberEnter();
-        return;
-      case 'ArrowLeft':
-        node.setSelectionRange(pos - 1, pos - 1);
-        return;
-      case 'ArrowRight':
-        node.setSelectionRange(pos + 1, pos + 1);
-        return;
-      case 'Backspace':
-        value = value.slice(0, -1);
-        break;
-      default:
-        value += key;
-    }
-
-    const pageNumber = parseInt(value, 10);
-    if (pageNumber > this.numPages) return;
-    this.pageInputNumber = value;
-    node.setAttribute('value', this.pageInputNumber);
-    node.setSelectionRange(this.pageInputNumber.length, this.pageInputNumber.length);
-  }
-
-  pageNumberEnter() {
-    const pageNumber = parseInt(this.pageInputNumber, 10);
-    if (pageNumber > this.numPages || pageNumber < 0 || isNaN(pageNumber)) return;
-    this.changePage(pageNumber);
-  }
-
-  /**
-   * click on pagination page number
-   * @param {MouseEvent} event - mouse click event
-   */
-  paginationNumberClick(event) {
-    const target = event.currentTarget;
-    if (event.type && target.classList.contains('pagination-active')) return;
-    const pageNumber = parseFloat(target.getAttribute('data-page'));
-    this.el.querySelector('.pagination-active').classList.remove('pagination-active');
-    target.classList.add('pagination-active');
-    this.changePage(pageNumber);
-  }
-
-  changePage(pageNumber) {
-    this.pageNodes[this.pageState.currentPage].removeAttribute('style');
-    if (this.pageState.currentPage + 1 < this.numPages) this.pageNodes[this.pageState.currentPage + 1].removeAttribute('style');
-    this.pageState.currentPage = pageNumber % 2 === 0 ? pageNumber - 1 : pageNumber - 2;
-    if (this.pageState.currentPage < 0) this.pageState.currentPage = 0;
-    this.renderNext();
-    if (this.pageState.currentPage === 0 && this.firstPageView === 'cover') {
-      Object.assign(this.pageNodes[this.pageState.currentPage].style, {
-        display: 'flex',
-        left: '50%',
-      });
-    } else {
-      Object.assign(this.pageNodes[this.pageState.currentPage].style, {
-        display: 'flex',
-        transform: 'perspective(2000px) rotateY(0deg)',
-      });
-      if (this.pageState.currentPage + 1 < this.numPages) {
-        Object.assign(this.pageNodes[this.pageState.currentPage + 1].style, {
-          left: '50%',
-          display: 'flex',
-        });
-      }
-    }
-    if (this.pageNumberInput === true) this.pageInput.querySelector('input').setAttribute('value', pageNumber);
-    if (this.saveLastSeenPage === true) localStorage.setItem('saveLastSeenPage', this.pageState.currentPage);
-  }
-
-  /**
-   * pagination left arrow click handler
-   * @param {MouseEvent} event - mouse click event
-   * @param {Boolean} flip - if page flipped or click arrow
-   */
-  paginationLeft(event, flip = false) {
-    const active = this.paginationNode.querySelector('.pagination-active');
-    const activeNumber = parseFloat(active.getAttribute('data-page'));
-    if (activeNumber === 1) return;
-
-    active.classList.remove('pagination-active');
-    const fakeEvent = {};
-    let previous = flip ? this.paginationNode.querySelector('[data-page="' + (this.pageState.currentPage + 1) + '"]') : active.previousSibling;
-    // if clicked on last number and then click/flip left
-    if (activeNumber === this.numPages && active.previousSibling.classList.contains('pagination-gap')) {
-      const max = this.pagination.max - 1 || 9;
-      this.paginationNode.querySelector('.pagination-gap').remove();
-      const nodes = [...this.paginationNode.querySelectorAll('.pagination')];
-      nodes.forEach((node, index) => {
-        node.classList.remove('pagination-display');
-        if (index === 0 || index > this.numPages - max) node.classList.add('pagination-display');
-      });
-      nodes[0].after(createElement('div', { class: 'pagination-gap' }, '...'));
-      previous = flip ? this.paginationNode.querySelector('[data-page="' + (this.pageState.currentPage + 1) + '"]') : active.previousSibling;
-    }
-
-    const displayedNumbers = [...this.paginationNode.querySelectorAll('.pagination-display')];
-
-    if (
-      displayedNumbers.indexOf(previous) === -1
-      || (flip && activeNumber === 4 && displayedNumbers[0].nextSibling.classList.contains('pagination-gap'))
-    ) {
-      const last = displayedNumbers[displayedNumbers.length - 2];
-      const lastNumber = parseFloat(last.getAttribute('data-page'));
-      const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
-
-      if (secondNumber === 2) return;
-      if (secondNumber === 3 || (flip && secondNumber === 4)) {
-        displayedNumbers[0].nextSibling.remove();
-        if (flip) displayedNumbers[displayedNumbers.length - 2].classList.remove('pagination-display');
-      } else {
-        last.classList.remove('pagination-display');
-        if (flip) last.previousSibling.classList.remove('pagination-display');
-      }
-
-      previous.classList.add('pagination-display', 'pagination-active');
-      if (flip) previous.nextSibling.classList.add('pagination-display');
-      fakeEvent.currentTarget = displayedNumbers[1].previousSibling;
-      if (lastNumber === this.numPages - 1) {
-        last.after(createElement('div', { class: 'pagination-gap' }, '...'));
-        displayedNumbers[displayedNumbers.length - 3].classList.remove('pagination-display');
-      }
-    } else {
-      previous.classList.add('pagination-active');
-      fakeEvent.currentTarget = previous;
-    }
-
-    if (!flip) this.paginationNumberClick(fakeEvent);
-    if (this.saveLastSeenPage === true) localStorage.setItem('saveLastSeenPage', this.pageState.currentPage);
-  }
-
-  /**
-   * pagination right arrow click handler
-   * @param {MouseEvent} event - mouse click event
-   * @param {Boolean} flip - if page flipped or click arrow
-   */
-  paginationRight(event, flip = false) {
-    const active = this.paginationNode.querySelector('.pagination-active');
-    const activeNumber = parseFloat(active.getAttribute('data-page'));
-    if (activeNumber === this.numPages) return;
-
-    active.classList.remove('pagination-active');
-    const fakeEvent = {};
-    let next = flip ? this.paginationNode.querySelector('[data-page="' + (this.pageState.currentPage + 1) + '"]') : active.nextSibling;
-
-    if (activeNumber === 1 && active.nextSibling.classList.contains('pagination-gap')) {
-      this.paginationNode.querySelector('.pagination-gap').remove();
-      const nodes = [...this.paginationNode.querySelectorAll('.pagination')];
-      const max = this.pagination.max - 2 || 8;
-      nodes.forEach((node, index) => {
-        node.classList.remove('pagination-display');
-        if (index < max || index === this.numPages - 1) node.classList.add('pagination-display');
-      });
-
-      nodes[nodes.length - 2].after(createElement('div', { class: 'pagination-gap' }, '...'));
-      next = flip ? this.paginationNode.querySelector('[data-page="' + (this.pageState.currentPage + 1) + '"]') : active.nextSibling;
-    }
-    const displayedNumbers = [...this.paginationNode.querySelectorAll('.pagination-display')];
-    if (
-      displayedNumbers.indexOf(next) === -1
-      || (flip && activeNumber === this.numPages - 2 && displayedNumbers[displayedNumbers.length - 1].previousSibling.classList.contains('pagination-gap'))
-    ) {
-      const last = displayedNumbers[displayedNumbers.length - 2];
-      const lastNumber = parseFloat(last.getAttribute('data-page'));
-      const secondNumber = parseFloat(displayedNumbers[1].getAttribute('data-page'));
-      if (lastNumber === this.numPages - 1) return;
-      if (lastNumber === this.numPages - 2 || (flip && lastNumber === this.numPages - 3)) {
-        displayedNumbers[displayedNumbers.length - 1].previousSibling.remove();
-        // displayedNumbers[1].previousSibling.classList.add('pagination-display');
-      } else {
-        displayedNumbers[1].classList.remove('pagination-display');
-        if (flip) displayedNumbers[2].classList.remove('pagination-display');
-      }
-      if (flip) next.previousSibling.classList.add('pagination-display');
-      next.classList.add('pagination-display', 'pagination-active');
-      fakeEvent.currentTarget = flip ? next : last.nextSibling;
-      if (secondNumber === 2) {
-        if (flip) displayedNumbers[3].classList.remove('pagination-display');
-        displayedNumbers[2].classList.remove('pagination-display');
-        displayedNumbers[0].after(createElement('div', { class: 'pagination-gap' }, '...'));
-      }
-    } else {
-      next.classList.add('pagination-active');
-      fakeEvent.currentTarget = next;
-    }
-
-    if (!flip) this.paginationNumberClick(fakeEvent);
-    if (this.saveLastSeenPage === true) localStorage.setItem('saveLastSeenPage', this.pageState.currentPage);
   }
 
   /**

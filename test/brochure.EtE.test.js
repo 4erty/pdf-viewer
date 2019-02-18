@@ -76,4 +76,11 @@ describe('on Brochure loaded', () => {
     const newButtons = await page.$$eval('.pagination-display', pageNodes => pageNodes.map(page => page.getAttribute('data-page')));
     expect(newButtons).toEqual(buttons);
   }, timeout);
+
+  test('flip pages', async () => {
+    await page.mouse.move(100, 100);
+    await page.mouse.down();
+    await page.mouse.move(126, 19);
+    await page.mouse.up();
+  });
 });

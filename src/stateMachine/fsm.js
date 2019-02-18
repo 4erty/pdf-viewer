@@ -90,6 +90,10 @@ export default {
       },
       end: function () {
         // if (this.flippedPageOtherside) this.flippedPageOtherside.removeAttribute('style');
+        if (this.angle > 5) {
+          this.dispatch('animation');
+          return;
+        }
 
         this.flippedPage.removeAttribute('style');
         this.flippedPage.classList.remove('flip-right');
@@ -103,6 +107,9 @@ export default {
 
         this.changeStateTo(INACTIVE);
         this.dispatch('end');
+      },
+      animation: function () {
+        this.startAnimation();
       },
     },
     [FLIP_RIGHT_FROM_MIDDLE]: {
@@ -133,6 +140,11 @@ export default {
         });
       },
       end: function () {
+        if (this.angle < 175) {
+          this.dispatch('animation');
+          return;
+        }
+
         if (this.flippedPageOtherside) this.flippedPageOtherside.removeAttribute('style');
 
         this.flippedPage.removeAttribute('style');
@@ -148,6 +160,9 @@ export default {
 
         this.changeStateTo(INACTIVE);
         this.dispatch('end');
+      },
+      animation: function () {
+        this.startAnimation();
       },
     },
     [FLIP_LEFT_TO_MIDDLE]: {
@@ -195,6 +210,11 @@ export default {
         });
       },
       end: function () {
+        if (this.angle < 175) {
+          this.dispatch('animation');
+          return;
+        }
+
         this.flippedPage.removeAttribute('style');
         this.flippedPage.classList.remove('flip-left');
         this.flippedPage.style.display = 'flex';
@@ -206,6 +226,9 @@ export default {
 
         this.changeStateTo(INACTIVE);
         this.dispatch('end');
+      },
+      animation: function () {
+        this.startAnimation();
       },
     },
     [FLIP_LEFT_FROM_MIDDLE]: {
@@ -237,6 +260,11 @@ export default {
         });
       },
       end: function () {
+        if (this.angle > 5) {
+          this.dispatch('animation');
+          return;
+        }
+
         if (this.flippedPageOtherside) this.flippedPageOtherside.removeAttribute('style');
 
         this.flippedPage.removeAttribute('style');
@@ -253,6 +281,9 @@ export default {
 
         this.changeStateTo(INACTIVE);
         this.dispatch('end');
+      },
+      animation: function () {
+        this.startAnimation();
       },
     },
   },
@@ -272,5 +303,53 @@ export default {
   },
   endMoveHandler(event) {
     this.dispatch('end', event);
+  },
+  startAnimation() {
+    // remove events listeners
+    document.removeEventListener(events.move, this.moveHandler);
+    document.removeEventListener(events.end, this.endMoveHandler);
+
+    const start = performance.now();
+    const duration = 600;
+
+    const animate = (time) => {
+      let timePassed = time - start;
+
+      if (timePassed > duration) timePassed = duration;
+
+      this.flipAnimation(timePassed, duration);
+
+      if (timePassed < duration && this.animationFrame !== null) {
+        this.animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    this.animationFrame = requestAnimationFrame(animate);
+  },
+  flipAnimation(timePassed, duration) {
+    const frame = timePassed > 0 ? Math.round(1000 * (90 / duration) * timePassed) / 1000 : 0;
+
+    if (this.move === 'right' && this.angle < 90) {
+      this.angle -= frame;
+      this.flippedPage.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
+    }
+    if (this.move === 'right' && this.angle >= 90) {
+      this.flippedPageBack.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
+      this.angle += frame;
+    }
+    if (this.move === 'left' && this.angle >= 90) {
+      this.flippedPage.style.transform = `perspective(2000px) rotateY(${180 - this.angle}deg)`;
+      this.angle += frame;
+    }
+    if (this.move === 'left' && this.angle < 90) {
+      this.flippedPageBack.style.transform = `perspective(2000px) rotateY(-${this.angle}deg)`;
+      this.angle -= frame;
+    }
+
+    if (this.angle >= 180 || this.angle <= 0) {
+      cancelAnimationFrame(this.animationFrame);
+      this.animationFrame = null;
+      this.dispatch('end');
+    }
   },
 };
