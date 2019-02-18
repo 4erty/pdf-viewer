@@ -151,6 +151,10 @@ class Brochure {
     return page;
   }
 
+  /**
+   * change pagination page number handler
+   * @param {number} page - page number
+   */
   paginationNumberChange(page) {
     const pageNumber = page + 1;
     const active = this.paginationNode.querySelector('.pagination-active');
@@ -166,6 +170,11 @@ class Brochure {
     }
   }
 
+  /**
+   * redraw pagination numbers
+   * @param {number} page - page number
+   * @param {string} move - move to 'left' or 'right'
+   */
   paginationRerender(page, move) {
     const pages = [...this.paginationNode.querySelectorAll('.pagination')];
     const max = this.pagination.max - 4;
@@ -175,9 +184,10 @@ class Brochure {
     const first = this.paginationNode.querySelector('[data-page="1"]');
     const last = this.paginationNode.querySelector(`[data-page="${this.numPages}"]`);
     if (!first.nextSibling.classList.contains('pagination-gap') && page > 1) first.after(createElement('div', { class: 'pagination-gap' }, '...'));
-    if (page === 0 && first.nextSibling.classList.contains('pagination-gap')) {
-      first.nextSibling.remove();
-      end += 3;
+    if (page <= 1) {
+      if (first.nextSibling.classList.contains('pagination-gap')) first.nextSibling.remove();
+      end += 2;
+      if (page === 0) end += 1;
     }
     if (!last.previousSibling.classList.contains('pagination-gap')) last.before(createElement('div', { class: 'pagination-gap' }, '...'));
     if (page === length - 1 && last.previousSibling.classList.contains('pagination-gap')) {
@@ -383,7 +393,7 @@ class Brochure {
 
     this.fsm = fsm;
     this.book.addEventListener(events.start, this.flip);
-    // this.book.addEventListener(events.start, this.flipStart);
+
     this.el.removeChild(this.loading);
     if (this.saveLastSeenPage === true) {
       const pageNumber = parseInt(localStorage.getItem('saveLastSeenPage'), 10) + 1;

@@ -77,10 +77,62 @@ describe('on Brochure loaded', () => {
     expect(newButtons).toEqual(buttons);
   }, timeout);
 
-  test('flip pages', async () => {
-    await page.mouse.move(100, 100);
-    await page.mouse.down();
-    await page.mouse.move(126, 19);
-    await page.mouse.up();
-  });
+  test('click on first page then flip all pages to the end', async () => {
+    await page.click(`[data-page="${1}"]`);
+    let displayed = await page.$$eval('.pagination-display', pageNodes => pageNodes.length);
+    let gap = await page.$$eval('.pagination-gap', pageNodes => pageNodes.length);
+    expect(displayed + gap).toEqual(10);
+    for (let i = 1; i <= 7; i++) {
+      await page.mouse.move(600, 400);
+      await page.mouse.down();
+      await page.mouse.move(200, 400);
+      await page.mouse.up();
+      displayed = await page.$$eval('.pagination-display', pageNodes => pageNodes.length);
+      gap = await page.$$eval('.pagination-gap', pageNodes => pageNodes.length);
+      expect(displayed + gap).toEqual(10);
+    }
+    expect(displayed + gap).toEqual(10);
+  }, timeout);
+
+  test('flip all pages from the end to 1', async () => {
+    let displayed;
+    let gap;
+    for (let i = 1; i <= 7; i++) {
+      await page.mouse.move(200, 400);
+      await page.mouse.down();
+      await page.mouse.move(600, 400);
+      await page.mouse.up();
+      displayed = await page.$$eval('.pagination-display', pageNodes => pageNodes.length);
+      gap = await page.$$eval('.pagination-gap', pageNodes => pageNodes.length);
+      expect(displayed + gap).toEqual(10);
+    }
+    expect(displayed + gap).toEqual(10);
+  }, timeout);
+
+  test('click on 10 random pagination numbers', async () => {
+    for (let i = 0; i < 10; i++) {
+      let buttons = await page.$$eval('.pagination-display', pageNodes => {
+        return pageNodes.map(page => page.getAttribute('data-page'));
+      });
+      let button = Math.floor(Math.random() * buttons.length);
+      await page.click(`[data-page="${buttons[button]}"]`);
+      let displayed = await page.$$eval('.pagination-display', pageNodes => pageNodes.length);
+      let gap = await page.$$eval('.pagination-gap', pageNodes => pageNodes.length);
+      expect(displayed + gap).toEqual(10);
+    }
+  }, timeout);
+
+  test('manual enter 10 random page numbers', async () => {
+    for (let i = 0; i < 10; i++) {
+      let number = (Math.floor(Math.random() * 14) + 1).toString(10);
+      await page.click('.inputPage');
+      await page.keyboard.type(number);
+      await page.keyboard.press('Enter');
+      let displayed = await page.$$eval('.pagination-display', pageNodes => pageNodes.length);
+      let gap = await page.$$eval('.pagination-gap', pageNodes => pageNodes.length);
+      expect(displayed + gap).toEqual(10);
+      await page.keyboard.press('Backspace');
+      await page.keyboard.press('Backspace');
+    }
+  }, timeout);
 });

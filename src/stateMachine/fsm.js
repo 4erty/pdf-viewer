@@ -16,9 +16,9 @@ export default {
         Object.assign(this, brochure);
         // if pdf with 1 page - can't flip
         if (this.numPages === 1) return;
-
+        let x = event.type.indexOf('touch') !== -1 ? event.touches[0].clientX : event.clientX;
         // check clicked on right or left page
-        this.move = event.clientX - this.posX > this.bookWidth / 2 ? 'right' : 'left';
+        this.move = x - this.posX > this.bookWidth / 2 ? 'right' : 'left';
         // if we see 2 last pages - can't flip to right
         if (this.move === 'right' && this.pageState.currentPage + 2 >= this.numPages) return;
         // if flip left and currnet page = 0, can't flip
@@ -69,7 +69,8 @@ export default {
       },
       move: function (event) {
         const pageWidth = this.bookWidth;
-        this.angle = 180 - 180 * (event.clientX - this.posX) / pageWidth;
+        let x = event.type.indexOf('touch') !== -1 ? event.touches[0].clientX : event.clientX;
+        this.angle = 180 - 180 * (x - this.posX) / pageWidth;
 
         if (this.angle > 90) {
           this.changeStateTo(FLIP_RIGHT_FROM_MIDDLE);
@@ -120,7 +121,8 @@ export default {
       },
       move: function (event) {
         const pageWidth = this.bookWidth;
-        this.angle = 180 - 180 * (event.clientX - this.posX) / pageWidth;
+        let x = event.type.indexOf('touch') !== -1 ? event.touches[0].clientX : event.clientX;
+        this.angle = 180 - 180 * (x - this.posX) / pageWidth;
 
         if (this.angle < 90) {
           this.flippedPageBack.removeAttribute('style');
@@ -190,7 +192,8 @@ export default {
       },
       move: function (event) {
         const pageWidth = this.bookWidth;
-        this.angle = 180 - 180 * (event.clientX - this.posX) / pageWidth;
+        let x = event.type.indexOf('touch') !== -1 ? event.touches[0].clientX : event.clientX;
+        this.angle = 180 - 180 * (x - this.posX) / pageWidth;
 
         if (this.angle < 90) {
           this.changeStateTo(FLIP_LEFT_FROM_MIDDLE);
@@ -238,7 +241,8 @@ export default {
       },
       move: function (event) {
         const pageWidth = this.bookWidth;
-        this.angle = 180 - 180 * (event.clientX - this.posX) / pageWidth;
+        let x = event.type.indexOf('touch') !== -1 ? event.touches[0].clientX : event.clientX;
+        this.angle = 180 - 180 * (x - this.posX) / pageWidth;
 
         if (this.angle > 90) {
           this.flippedPageBack.removeAttribute('style');
