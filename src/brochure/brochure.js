@@ -392,6 +392,7 @@ class Brochure {
     if (this.pageNumberInput === true) this.renderManualInput();
 
     this.fsm = fsm;
+
     this.book.addEventListener(events.start, this.flip);
 
     this.el.removeChild(this.loading);

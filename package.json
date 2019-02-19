@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "webpack-dev-server",
-    "build": "webpack --config=webpack.config.js --mode=production",
+    "build": "webpack --config=webpack.prod.config.js",
     "watch": "webpack --config=webpack.config.js --watch",
     "test": "jest"
   },
@@ -27,6 +27,7 @@
     "puppeteer": "^1.12.2",
     "style-loader": "^0.23.1",
     "webpack": "^4.29.3",
+    "webpack-bundle-analyzer": "^3.0.4",
     "webpack-cli": "^3.2.3",
     "webpack-dev-middleware": "^3.5.2",
     "webpack-dev-server": "^3.1.14"
