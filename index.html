@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="brocure">
-    <script defer src="./brochure/pdf.js"></script>
+    <script defer src="./assets/pdf.js"></script>
     <script defer src="./brochure/brochure.js"></script>
     <script defer>
       document.addEventListener('DOMContentLoaded', () => {
@@ -16,7 +16,7 @@
         const testUrl = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
         // const testUrl = './brochure/A17_FlightPlan.pdf';
         const htmlElement = document.querySelector('.brocure');
-        const workerSrc = './brochure/pdf.worker.js';
+        const workerSrc = './assets/pdf.worker.js';
         const pagination = {
           show: true,
           max: 10,
@@ -25,6 +25,7 @@
           contentType: 'pdf',
           data: testUrl,
           htmlNode: htmlElement,
+          firstPageView: 'cover',
           workerSrc,
           title,
           pagination,

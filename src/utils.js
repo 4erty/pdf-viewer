@@ -30,3 +30,29 @@ export const applyCss = (node, stylesObject) => {
     node.style.setProperty(key, stylesObject[key]);
   });
 };
+
+export const downloadURI = (uri, name) => {
+  var link = document.createElement('a');
+  link.download = name;
+  link.href = uri;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  link.remove();
+};
+
+export const getId = (element) => {
+  const currentId = element.id;
+  const text = 'brochure_id_';
+  let i = 1;
+  let id = text + i;
+  if (currentId !== '' && currentId !== id) return currentId;
+
+  while (currentId !== id) {
+    id = text + i;
+    i++;
+  }
+
+  return id;
+};

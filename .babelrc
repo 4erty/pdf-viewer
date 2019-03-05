@@ -1,5 +1,14 @@
 {
-  "presets": ["@babel/env"],
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "modules": false,
+        "loose": true,
+        "useBuiltIns": "usage"
+      }
+    ]
+  ],
   "plugins": [
     "@babel/plugin-proposal-object-rest-spread",
     "@babel/plugin-transform-destructuring",

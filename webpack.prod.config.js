@@ -14,9 +14,6 @@ module.exports = {
     libraryTarget: 'var',
   },
   mode: 'production',
-  optimization: {
-    runtimeChunk: true,
-  },
   module: {
     rules: [
       {
@@ -40,6 +37,8 @@ module.exports = {
       hashDigest: 'base64',
       hashDigestLength: 4,
     }),
-    new BundleAnalyzerPlugin(),
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+    }),
   ],
 };

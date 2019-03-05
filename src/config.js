@@ -10,3 +10,4 @@ export const events = isTouch
 export const TITLE_HEIGHT = 48;
 // pagination height
 export const PAGINATION_HEIGHT = 96;
+export const DOWNLOAD_BUTTON_HEIGHT = 48;

@@ -47054,4 +47054,3 @@ exports.MessageHandler = MessageHandler;
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=pdf.worker.js.map

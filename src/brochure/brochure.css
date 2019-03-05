@@ -205,6 +205,8 @@
 }
 
 .brochure-image {
+  object-fit: cover;
+  object-position: center;
   display: block;
   max-width: 100%;
   max-height: 100%;
@@ -239,4 +241,31 @@
   perspective-origin: 0% 50%;
   transform-origin: 100% 50% 0px;
   z-index: 2;
+}
+
+.downloadButtonWrapper {
+  margin: 6px 12px;
+  max-height: 48px;
+}
+
+.downloadButton {
+  background-color: rgba(0, 123, 255, 1);
+  border: none;
+  box-shadow:
+    0 3px 1px -2px rgba(0,0,0,.2),
+    0 2px 2px 0 rgba(0,0,0,.14),
+    0 1px 5px 0 rgba(0,0,0,.12);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 8px 32px;
+}
+
+.downloadButton:hover {
+  background-color: rgba(0, 123, 255, 0.87);
+  box-shadow:
+    0 2px 4px -1px rgba(0,0,0,.2),
+    0 4px 5px 0 rgba(0,0,0,.14),
+    0 1px 10px 0 rgba(0,0,0,.12);
 }

@@ -1,7 +1,7 @@
 'use strict';
 import './brochure.css';
 
-import { createElement } from '../utils';
+import { createElement, downloadURI, getId } from '../utils';
 
 import fsm from '../stateMachine/fsm';
 
@@ -9,6 +9,7 @@ import {
   events,
   TITLE_HEIGHT,
   PAGINATION_HEIGHT,
+  DOWNLOAD_BUTTON_HEIGHT,
 } from '../config';
 
 // variables to calculate performance
@@ -31,6 +32,7 @@ let endRender = 0;
  * @param {number} [pagination.max=10] - maximum pages in pagination
  * @param {boolean} [pageNumberInput=false] - show manual page number input or not
  * @param {boolean} [saveLastSeenPage=false] - save last seen page
+ * @param {boolean} [isShowDownloadLink=false] - show link to download pdf file
  */
 
 class Brochure {
@@ -45,6 +47,7 @@ class Brochure {
     pagination = {},
     pageNumberInput = false,
     saveLastSeenPage = false,
+    isShowDownloadLink = false,
     options = {},
   }) {
     const initialState = {
@@ -64,7 +67,7 @@ class Brochure {
     this.pages = [];
     this.pageNodes = [];
     this.pageContentNodes = [];
-    // this.currentPage = 0;
+    this.isShowDownloadLink = isShowDownloadLink;
     this.numPages = 0;
     this.renderedPages = 0;
     this.width = 0;
@@ -104,9 +107,11 @@ class Brochure {
 
   /**
    * current page change handler
-   * @param {number} page - new page number from 1
+   * @param {number} pageNum - new page number
    */
-  currentPageChanged(page) {
+  currentPageChanged(pageNum) {
+    let page = pageNum;
+    const view = this.firstPageView;
     const dispalyedPages = [...this.book.querySelectorAll('.brochure-page')].filter(page => page.style.display === 'flex');
     const pageNumber = parseInt(dispalyedPages[0].getAttribute('data-pagenum'), 10);
     if (page < 0 || page >= this.numPages) {
@@ -118,17 +123,31 @@ class Brochure {
     // check if display correct pages
     if (page !== pageNumber) {
       dispalyedPages.forEach(page => { page.removeAttribute('style'); });
-      if (page >= 1) this.book.querySelector(`[data-pagenum="${page}"]`).style.display = 'flex';
-      if (page < this.numPages - 1) {
-        const mainPage = this.firstPageView === 'cover' && page === 0;
-        Object.assign(this.book.querySelector(`[data-pagenum="${mainPage ? page : page + 1}"]`).style, {
-          display: 'flex',
-          left: '50%',
-        });
+      if (view === 'cover') {
+        if (page >= 1) this.book.querySelector(`[data-pagenum="${page}"]`).style.display = 'flex';
+        if (page < this.numPages - 1) {
+          const mainPage = this.firstPageView === 'cover' && page === 0;
+          Object.assign(this.book.querySelector(`[data-pagenum="${mainPage ? page : page + 1}"]`).style, {
+            display: 'flex',
+            left: '50%',
+          });
+        }
+      }
+
+      if (view === 'spread') {
+        if (page >= 0) this.book.querySelector(`[data-pagenum="${page}"]`).style.display = 'flex';
+        if (page < this.numPages - 1) {
+          Object.assign(this.book.querySelector(`[data-pagenum="${page + 1}"]`).style, {
+            display: 'flex',
+            left: '50%',
+          });
+        }
       }
     }
     // check pagination
     if (this.pagination.show === true) this.paginationNumberChange(page);
+    // save last seen page
+    if (this.saveLastSeenPage === true) localStorage.setItem(this.id, page);
   }
 
   /**
@@ -144,9 +163,9 @@ class Brochure {
       if (page < 0) page = 0;
       return page;
     }
-    let page = pageNumber % 2 === 0
-      ? pageNumber
-      : pageNumber - 1;
+    let page = pageNumber % 2 === 1
+      ? pageNumber - 1
+      : pageNumber - 2;
     if (page < 0) page = 0;
     return page;
   }
@@ -165,7 +184,7 @@ class Brochure {
       pagination.classList.add('pagination-active');
       active.classList.remove('pagination-active');
       if (pagination.classList.contains('pagination-display') && pageNumber !== this.numPages && pageNumber !== 1) return;
-
+      if (this.numPages <= this.pagination.max) return;
       this.paginationRerender(page, move);
     }
   }
@@ -173,26 +192,36 @@ class Brochure {
   /**
    * redraw pagination numbers
    * @param {number} page - page number
-   * @param {string} move - move to 'left' or 'right'
    */
-  paginationRerender(page, move) {
+  paginationRerender(page) {
     const pages = [...this.paginationNode.querySelectorAll('.pagination')];
-    const max = this.pagination.max - 4;
-    let start = move === 'right' ? page - max + 1 : page - 1;
-    let end = move === 'right' ? page + 1 : page + max - 1;
-    const length = this.numPages;
     const first = this.paginationNode.querySelector('[data-page="1"]');
     const last = this.paginationNode.querySelector(`[data-page="${this.numPages}"]`);
-    if (!first.nextSibling.classList.contains('pagination-gap') && page > 1) first.after(createElement('div', { class: 'pagination-gap' }, '...'));
-    if (page <= 1) {
+    const max = this.pagination.max - 4;
+    const length = this.numPages;
+    let start = page - max / 2;
+    let end = page + max / 2;
+    if (page > this.numPages - max) {
+      if (last.previousSibling.classList.contains('pagination-gap')) last.previousSibling.remove();
+      if (!first.nextSibling.classList.contains('pagination-gap')) {
+        first.after(createElement('div', { class: 'pagination-gap' }, '...'));
+      }
+      start = this.numPages - max - 2;
+      end = this.numPages;
+    } else if (page < max) {
       if (first.nextSibling.classList.contains('pagination-gap')) first.nextSibling.remove();
-      end += 2;
-      if (page === 0) end += 1;
-    }
-    if (!last.previousSibling.classList.contains('pagination-gap')) last.before(createElement('div', { class: 'pagination-gap' }, '...'));
-    if (page === length - 1 && last.previousSibling.classList.contains('pagination-gap')) {
-      last.previousSibling.remove();
-      start -= 2;
+      if (!last.previousSibling.classList.contains('pagination-gap')) {
+        last.before(createElement('div', { class: 'pagination-gap' }, '...'));
+      }
+      start = 1;
+      end = max + 2;
+    } else {
+      if (!last.previousSibling.classList.contains('pagination-gap')) {
+        last.before(createElement('div', { class: 'pagination-gap' }, '...'));
+      }
+      if (!first.nextSibling.classList.contains('pagination-gap')) {
+        first.after(createElement('div', { class: 'pagination-gap' }, '...'));
+      }
     }
 
     pages.forEach((page, index) => {
@@ -311,8 +340,10 @@ class Brochure {
 
       if (page === 0) {
         pageNode.style.display = 'flex';
-        if (this.firstPageView === 'cover') pageNode.style.left = '50%';
-        pageNode.classList.add('brochure-mainpage');
+        if (this.firstPageView === 'cover') {
+          pageNode.style.left = '50%';
+          pageNode.classList.add('brochure-mainpage');
+        }
       }
 
       // if view mode is cover and number of pages even - add cover to last page
@@ -390,19 +421,18 @@ class Brochure {
     }
     if (this.pagination.show === true) this.renderPagination();
     if (this.pageNumberInput === true) this.renderManualInput();
+    if (this.isShowDownloadLink === true) this.renderDownloadButton();
 
     this.fsm = fsm;
 
     this.book.addEventListener(events.start, this.flip);
 
     this.el.removeChild(this.loading);
+
     if (this.saveLastSeenPage === true) {
-      const pageNumber = parseInt(localStorage.getItem('saveLastSeenPage'), 10) + 1;
-      this.changePage(pageNumber);
-      if (this.pagination.show === true) {
-        this.paginationNode.querySelector('[data-page="1"]').classList.remove('pagination-active');
-        this.paginationNode.querySelector(`[data-page="${pageNumber}"]`).classList.add('pagination-active');
-      }
+      this.id = getId(this.el);
+      const pageNumber = parseInt(localStorage.getItem(this.id), 10);
+      if (pageNumber) this.pageState.currentPage = pageNumber;
     }
   }
 
@@ -457,6 +487,23 @@ class Brochure {
   }
 
   /**
+   * render download button
+   */
+  renderDownloadButton() {
+    const downloadButton = createElement(
+      'div',
+      { class: 'downloadButtonWrapper' },
+      createElement('button', { class: 'downloadButton' }, 'Скачать'),
+    );
+    this.el.appendChild(downloadButton);
+    downloadButton.querySelector('.downloadButton').addEventListener('click', () => {
+      const url = this.url;
+      const name = `${this.title !== null ? this.title : 'file'}.pdf`;
+      downloadURI(url, name);
+    });
+  }
+
+  /**
    * initialisation for pdf file
    */
   async initPdf() {
@@ -476,12 +523,18 @@ class Brochure {
         // if rendered first page - get width and position
         if (i === 1) {
           let viewport = page.getViewport(1);
-          this.scale = Math.round(1000 * this.height / viewport.height) / 1000;
+          if (viewport.height >= viewport.width) {
+            this.scale = Math.round(1000 * this.height / viewport.height) / 1000;
+          }
+          if (viewport.width > viewport.height) {
+            this.scale = Math.round(1000 * this.width / (viewport.width * 2)) / 1000;
+          }
           viewport = page.getViewport(this.scale);
           this.bookWidth = 2 * viewport.width;
           this.book.style.width = this.bookWidth + 'px';
           this.posX = this.book.getBoundingClientRect().x;
           this.posY = this.book.getBoundingClientRect().y;
+          if (viewport.width > viewport.height) this.book.style.height = viewport.height + 'px';
         }
 
         const viewport = page.getViewport(this.scale);
@@ -540,6 +593,9 @@ class Brochure {
 
     this.width = this.el.getBoundingClientRect().width;
     this.height = this.pagination.show === true ? this.height - PAGINATION_HEIGHT : this.height;
+    this.height = this.isShowDownloadLink === true
+      ? this.height - DOWNLOAD_BUTTON_HEIGHT
+      : this.height;
 
     this.el.classList.add('brochure');
     if (this.title !== null) {
@@ -549,7 +605,7 @@ class Brochure {
     this.book = createElement('div', { class: 'brochure-book' });
     this.book.style.height = this.height + 'px';
     // TODO loading state
-    this.loading = createElement('div', { class: 'brochure-loading' }, 'Loading...');
+    this.loading = createElement('div', { class: 'brochure-loading' }, 'Загрузка страниц...');
     this.el.appendChild(this.book);
     this.el.appendChild(this.loading);
 

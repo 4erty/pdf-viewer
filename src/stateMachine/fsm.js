@@ -180,7 +180,10 @@ export default {
         this.flippedPageBack = this.pageNodes[this.pageState.currentPage - index];
         this.flippedPageBack.classList.add('move-left');
 
-        if (this.pageState.currentPage > 2) {
+        if (
+          (this.firstPageView === 'cover' && this.pageState.currentPage > 2)
+          || (this.firstPageView === 'spread' && this.pageState.currentPage > 1)
+        ) {
           this.flippedPageUnder = this.pageNodes[this.pageState.currentPage - index - 1];
           Object.assign(this.flippedPageUnder.style, {
             display: 'flex',

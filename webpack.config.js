@@ -6,7 +6,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'brochure/'),
-    publicPath: '/brochure',
+    publicPath: '/assets',
     filename: '[name].js',
     library: '__Brochure',
     libraryTarget: 'var',
