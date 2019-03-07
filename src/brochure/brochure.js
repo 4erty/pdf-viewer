@@ -577,7 +577,9 @@ class Brochure {
         this.posY = this.book.getBoundingClientRect().y;
       }
 
-      const content = createElement('img', { class: 'brochure-image', src: this.url[i].url, draggable: false });
+      const content = this.url[i].type === 'file'
+        ? createElement('img', { class: 'brochure-image', src: this.url[i].url, draggable: false })
+        : createElement('iframe', { class: 'brochure-frame', src: this.url[i].url, draggable: false });
       content.style.width = this.bookWidth / 2 + 'px';
       content.style.height = this.height + 'px';
       this.pageContentNodes.push(content);

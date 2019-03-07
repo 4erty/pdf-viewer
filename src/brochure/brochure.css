@@ -214,6 +214,11 @@
       user-select: none;
 }
 
+.brochure-frame {
+  display: flex;
+  pointer-events: none;
+}
+
 .move-right {
   left: 0;
   perspective-origin: 50% 0%;
