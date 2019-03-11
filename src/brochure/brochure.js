@@ -421,7 +421,7 @@ class Brochure {
     }
     if (this.pagination.show === true) this.renderPagination();
     if (this.pageNumberInput === true) this.renderManualInput();
-    if (this.isShowDownloadLink === true) this.renderDownloadButton();
+    if (this.isShowDownloadLink === true && this.contentType === 'pdf') this.renderDownloadButton();
 
     this.fsm = fsm;
 
