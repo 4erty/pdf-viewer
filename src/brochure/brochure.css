@@ -90,6 +90,7 @@
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
+  -ms-flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: baseline;
   width: 100%;

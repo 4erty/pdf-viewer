@@ -20,9 +20,9 @@ export default {
         // check clicked on right or left page
         this.move = x - this.posX > this.bookWidth / 2 ? 'right' : 'left';
         // if we see 2 last pages - can't flip to right
-        if (this.move === 'right' && this.pageState.currentPage + 2 >= this.numPages) return;
+        if (this.move === 'right' && this.currentPage + 2 >= this.numPages) return;
         // if flip left and currnet page = 0, can't flip
-        if (this.move === 'left' && this.pageState.currentPage === 0) return;
+        if (this.move === 'left' && this.currentPage === 0) return;
 
         this.flippedPage = event.target.closest('.brochure-page');
         if (this.move === 'right') this.changeStateTo(FLIP_RIGHT_TO_MIDDLE);
@@ -45,19 +45,19 @@ export default {
     },
     [FLIP_RIGHT_TO_MIDDLE]: {
       start: function () {
-        const index = this.firstPageView === 'cover' && this.pageState.currentPage === 0 ? 1 : 2;
+        const index = this.firstPageView === 'cover' && this.currentPage === 0 ? 1 : 2;
 
-        if (this.pageState.currentPage > 0) {
-          this.flippedPageOtherside = this.pageNodes[this.pageState.currentPage];
+        if (this.currentPage > 0) {
+          this.flippedPageOtherside = this.pageNodes[this.currentPage];
         }
 
         this.flippedPage.classList.add('flip-right');
 
-        this.flippedPageBack = this.pageNodes[this.pageState.currentPage + index];
+        this.flippedPageBack = this.pageNodes[this.currentPage + index];
         this.flippedPageBack.classList.add('move-right');
 
-        if (this.pageState.currentPage < this.numPages - 3) {
-          this.flippedPageUnder = this.pageNodes[this.pageState.currentPage + index + 1];
+        if (this.currentPage < this.numPages - 3) {
+          this.flippedPageUnder = this.pageNodes[this.currentPage + index + 1];
           Object.assign(this.flippedPageUnder.style, {
             display: 'flex',
             left: '50%',
@@ -156,9 +156,12 @@ export default {
         this.flippedPageBack.removeAttribute('style');
         this.flippedPageBack.style.display = 'flex';
 
-        this.pageState.currentPage = this.firstPageView === 'cover' && this.pageState.currentPage === 0
-          ? this.pageState.currentPage + 1
-          : this.pageState.currentPage + 2;
+
+        let page = this.firstPageView === 'cover' && this.currentPage === 0
+          ? this.currentPage + 1
+          : this.currentPage + 2;
+
+        this.setCurrentPage(page);
 
         this.changeStateTo(INACTIVE);
         this.dispatch('end');
@@ -171,20 +174,20 @@ export default {
       start: function () {
         const index = 1;
 
-        if (this.pageState.currentPage < this.numPages - 1) {
-          this.flippedPageOtherside = this.pageNodes[this.pageState.currentPage + 1];
+        if (this.currentPage < this.numPages - 1) {
+          this.flippedPageOtherside = this.pageNodes[this.currentPage + 1];
         }
 
         this.flippedPage.classList.add('flip-left');
 
-        this.flippedPageBack = this.pageNodes[this.pageState.currentPage - index];
+        this.flippedPageBack = this.pageNodes[this.currentPage - index];
         this.flippedPageBack.classList.add('move-left');
 
         if (
-          (this.firstPageView === 'cover' && this.pageState.currentPage > 2)
-          || (this.firstPageView === 'spread' && this.pageState.currentPage > 1)
+          (this.firstPageView === 'cover' && this.currentPage > 2)
+          || (this.firstPageView === 'spread' && this.currentPage > 1)
         ) {
-          this.flippedPageUnder = this.pageNodes[this.pageState.currentPage - index - 1];
+          this.flippedPageUnder = this.pageNodes[this.currentPage - index - 1];
           Object.assign(this.flippedPageUnder.style, {
             display: 'flex',
           });
@@ -282,9 +285,11 @@ export default {
         this.flippedPageBack.style.display = 'flex';
         this.flippedPageBack.style.left = '50%';
 
-        this.pageState.currentPage = this.firstPageView === 'cover' && this.pageState.currentPage === 1
-          ? this.pageState.currentPage - 1
-          : this.pageState.currentPage - 2;
+        let page = this.firstPageView === 'cover' && this.currentPage === 1
+          ? this.currentPage - 1
+          : this.currentPage - 2;
+
+        this.setCurrentPage(page);
 
         this.changeStateTo(INACTIVE);
         this.dispatch('end');

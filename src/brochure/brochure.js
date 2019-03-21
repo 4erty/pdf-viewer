@@ -18,6 +18,25 @@ let startRender = 0;
 let end = 0;
 let endRender = 0;
 
+// polyfill for Element.closest
+if (!Element.prototype.matches) {
+  Element.prototype.matches = Element.prototype.msMatchesSelector
+    || Element.prototype.webkitMatchesSelector;
+}
+
+if (!Element.prototype.closest) {
+  // eslint-disable-next-line func-names
+  Element.prototype.closest = function (s) {
+    var el = this;
+
+    do {
+      if (el.matches(s)) return el;
+      el = el.parentElement || el.parentNode;
+    } while (el !== null && el.nodeType === 1);
+    return null;
+  };
+}
+
 /**
  * Represents a brochure.
  * @constructor
@@ -50,9 +69,6 @@ class Brochure {
     isShowDownloadLink = false,
     options = {},
   }) {
-    const initialState = {
-      currentPage: 0,
-    };
     this.url = data;
     this.el = htmlNode;
     this.contentType = contentType;
@@ -88,28 +104,18 @@ class Brochure {
     this.paginationNode = null;
     this.pageInput = null;
     this.pageInputNumber = '1';
-    this.pageState = new Proxy(initialState, { set: this.stateChange.bind(this) });
     this.fsm = {};
-
     this.flip = this.flip.bind(this);
+    this.setCurrentPage = this.setCurrentPage.bind(this);
     this.paginationNumberClick = this.paginationNumberClick.bind(this);
     this.paginationLeft = this.paginationLeft.bind(this);
     this.paginationRight = this.paginationRight.bind(this);
     this.pageNumberChange = this.pageNumberChange.bind(this);
+    this.currentPage = 0;
   }
 
-  /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["target"] }] */
-  stateChange(target, prop, value) {
-    target[prop] = value;
-    if (prop === 'currentPage') this.currentPageChanged(value);
-    return true;
-  }
-
-  /**
-   * current page change handler
-   * @param {number} pageNum - new page number
-   */
-  currentPageChanged(pageNum) {
+  setCurrentPage(pageNum) {
+    this.currentPage = pageNum;
     let page = pageNum;
     const view = this.firstPageView;
     const dispalyedPages = [...this.book.querySelectorAll('.brochure-page')].filter(page => page.style.display === 'flex');
@@ -244,36 +250,36 @@ class Brochure {
     const target = event.currentTarget;
     if (event.type && target.classList.contains('pagination-active')) return;
     const pageNumber = parseInt(target.getAttribute('data-page'), 10);
-    this.pageState.currentPage = this.convertPageNumber(pageNumber);
+    this.setCurrentPage(this.convertPageNumber(pageNumber));
   }
 
   /**
    * pagination left arrow click handler
    */
   paginationLeft() {
-    const pageNumber = this.pageState.currentPage + 1;
+    const pageNumber = this.currentPage + 1;
     if (pageNumber === 1) return;
     if (
       this.firstPageView === 'cover' && pageNumber === 2) {
-      this.pageState.currentPage = this.pageState.currentPage - 1;
+      this.setCurrentPage(this.currentPage - 1);
       return;
     }
-    this.pageState.currentPage = this.pageState.currentPage - 2;
+    this.setCurrentPage(this.currentPage - 2);
   }
 
   /**
    * pagination right arrow click handler
    */
   paginationRight() {
-    const pageNumber = this.pageState.currentPage + 1;
+    const pageNumber = this.currentPage + 1;
     if (pageNumber === this.numPages) return;
     if (
       this.firstPageView === 'cover'
       && (pageNumber === 1 || pageNumber === this.numPages)) {
-      this.pageState.currentPage = this.pageState.currentPage + 1;
+      this.setCurrentPage(this.currentPage + 1);
       return;
     }
-    this.pageState.currentPage = this.pageState.currentPage + 2;
+    this.setCurrentPage(this.currentPage + 2);
   }
 
   /**
@@ -319,7 +325,7 @@ class Brochure {
   pageNumberEnter() {
     const pageNumber = parseInt(this.pageInputNumber, 10);
     if (pageNumber > this.numPages || pageNumber < 0 || isNaN(pageNumber)) return;
-    this.pageState.currentPage = this.convertPageNumber(pageNumber);
+    this.setCurrentPage(this.convertPageNumber(pageNumber));
   }
 
   /**
@@ -362,7 +368,7 @@ class Brochure {
 
   /**
    * render pages if needed
-   * @param {boolean} next - if next === true render next 2 pages, else render 6 pages around this.pageState.currentPage
+   * @param {boolean} next - if next === true render next 2 pages, else render 6 pages around this.currentPage
    */
   renderNext(next) {
     if (next === true) {
@@ -382,11 +388,11 @@ class Brochure {
       }
       return;
     }
-    let start = this.pageState.currentPage > 4
-      ? this.pageState.currentPage - 4
-      : this.pageState.currentPage;
-    let end = this.pageState.currentPage < this.numPages - 4
-      ? this.pageState.currentPage + 4
+    let start = this.currentPage > 4
+      ? this.currentPage - 4
+      : this.currentPage;
+    let end = this.currentPage < this.numPages - 4
+      ? this.currentPage + 4
       : this.numPages;
     if (end <= start) return;
     for (let i = start; i < end; i++) {
@@ -432,7 +438,7 @@ class Brochure {
     if (this.saveLastSeenPage === true) {
       this.id = getId(this.el);
       const pageNumber = parseInt(localStorage.getItem(this.id), 10);
-      if (pageNumber) this.pageState.currentPage = pageNumber;
+      if (pageNumber) this.setCurrentPage(pageNumber);
     }
   }
 
@@ -475,7 +481,7 @@ class Brochure {
     const inputNode = createElement(
       'div',
       { class: 'inputWrapper' },
-      createElement('input', { type: 'text', class: 'inputPage', value: this.pageState.currentPage + 1 }),
+      createElement('input', { type: 'text', class: 'inputPage', value: this.currentPage + 1 }),
     );
     const totalNode = createElement('div', { class: 'inputTotal' });
     totalNode.textContent = `/ ${this.numPages}`;
@@ -532,8 +538,8 @@ class Brochure {
           viewport = page.getViewport(this.scale);
           this.bookWidth = 2 * viewport.width;
           this.book.style.width = this.bookWidth + 'px';
-          this.posX = this.book.getBoundingClientRect().x;
-          this.posY = this.book.getBoundingClientRect().y;
+          this.posX = this.book.getBoundingClientRect().x || this.book.getBoundingClientRect().left;
+          this.posY = this.book.getBoundingClientRect().y || this.book.getBoundingClientRect().top;
           if (viewport.width > viewport.height) this.book.style.height = viewport.height + 'px';
         }
 
@@ -573,8 +579,8 @@ class Brochure {
       if (i === 0) {
         this.bookWidth = this.width;
         this.book.style.width = this.bookWidth + 'px';
-        this.posX = this.book.getBoundingClientRect().x;
-        this.posY = this.book.getBoundingClientRect().y;
+        this.posX = this.book.getBoundingClientRect().x || this.book.getBoundingClientRect().left;
+        this.posY = this.book.getBoundingClientRect().y || this.book.getBoundingClientRect().top;
       }
 
       const content = this.url[i].type === 'file'

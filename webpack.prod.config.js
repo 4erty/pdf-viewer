@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
@@ -14,6 +15,7 @@ module.exports = {
     libraryTarget: 'var',
   },
   mode: 'production',
+  devtool: 'cheap-module-source-map',
   module: {
     rules: [
       {
@@ -29,9 +31,18 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        loader: 'babel-loader',
+        options: {
+          configFile: path.join(__dirname, './.babel.config.js'),
+        },
+      },
     ],
   },
   plugins: [
+    new CleanWebpackPlugin(),
     new webpack.HashedModuleIdsPlugin({
       hashFunction: 'md4',
       hashDigest: 'base64',
