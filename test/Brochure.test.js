@@ -1,5 +1,4 @@
 import Brochure from '../src/brochure/brochure.js';
-import { setTimeout } from 'timers';
 
 describe('Testing Brochure class.', () => {
   describe('Create new class', () => {

@@ -9,6 +9,7 @@ module.exports = {
 
   output: {
     path: path.resolve(__dirname, 'brochure/'),
+    // publicPath: 'assets/',
     filename: '[name].js',
     library: '__Brochure',
     libraryTarget: 'var',
@@ -44,7 +45,7 @@ module.exports = {
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         options: {
-          configFile: path.join(__dirname, './.babel.config.js'),
+          configFile: path.join(__dirname, './babel.config.js'),
         },
       },
     ],

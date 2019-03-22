@@ -20,9 +20,10 @@ const paginationMax = 10;
 
 app.use(middleware(compiler, { publicPath: config.output.publicPath }));
 app.use('/brochure', express.static(path.join(__dirname, '../brochure')));
+app.use('/assets', express.static(path.join(__dirname, '../assets')));
 
-app.listen(3000, () => {
-  console.log('Example app listening on port 3000!\n');
+const server = app.listen(3000, () => {
+  console.log('test server listening on port 3000!\n');
 });
 
 app.get('/', (req, res) => {
@@ -30,9 +31,13 @@ app.get('/', (req, res) => {
 });
 
 describe('on Brochure loaded', () => {
+  afterAll(() => {
+    server.close();
+  });
+
   beforeAll(async () => {
     browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       slowMo: 80,
     });
     page = await browser.newPage();
@@ -41,7 +46,8 @@ describe('on Brochure loaded', () => {
   });
 
   afterAll(() => {
-    browser.close();
+    server.close();
+    console.log('server closed');
   });
 
   test(`load ${paginationMax} pages`, async () => {
