@@ -210,7 +210,7 @@ class Brochure {
     if (page > this.numPages - max) {
       if (last.previousSibling.classList.contains('pagination-gap')) last.previousSibling.remove();
       if (!first.nextSibling.classList.contains('pagination-gap')) {
-        first.after(createElement('div', { class: 'pagination-gap' }, '...'));
+        first.insertAdjacentElement('afterend', createElement('div', { class: 'pagination-gap' }, '...'));
       }
       start = this.numPages - max - 2;
       end = this.numPages;
@@ -226,7 +226,7 @@ class Brochure {
         last.before(createElement('div', { class: 'pagination-gap' }, '...'));
       }
       if (!first.nextSibling.classList.contains('pagination-gap')) {
-        first.after(createElement('div', { class: 'pagination-gap' }, '...'));
+        first.insertAdjacentElement('afterend', createElement('div', { class: 'pagination-gap' }, '...'));
       }
     }
 
