@@ -422,7 +422,8 @@ class Brochure {
     console.log(`render html took ${end - startRender} milliseconds.`);
     if (this.pagination.show === true || this.pageNumberInput === true) {
       this.controls = createElement('div', { class: 'brochure-control' });
-      this.controls.style.width = this.bookWidth + 'px';
+      // this.controls.style.width = this.bookWidth + 'px';
+      this.controls.style.width = '100%';
       this.el.appendChild(this.controls);
     }
     if (this.pagination.show === true) this.renderPagination();
@@ -600,7 +601,9 @@ class Brochure {
     if (!(this.el instanceof Element)) throw new Error('Empty DOM node to create brochure');
 
     this.width = this.el.getBoundingClientRect().width;
-    this.height = this.pagination.show === true ? this.height - PAGINATION_HEIGHT : this.height;
+    this.height = this.pagination.show === true
+      ? this.height - Math.ceil(this.pagination.max / 10) * PAGINATION_HEIGHT
+      : this.height;
     this.height = this.isShowDownloadLink === true
       ? this.height - DOWNLOAD_BUTTON_HEIGHT
       : this.height;
