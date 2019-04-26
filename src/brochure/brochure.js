@@ -112,6 +112,7 @@ class Brochure {
     this.paginationRight = this.paginationRight.bind(this);
     this.pageNumberChange = this.pageNumberChange.bind(this);
     this.currentPage = 0;
+    this.rendered = false;
   }
 
   setCurrentPage(pageNum) {
@@ -441,6 +442,8 @@ class Brochure {
       const pageNumber = parseInt(localStorage.getItem(this.id), 10);
       if (pageNumber) this.setCurrentPage(pageNumber);
     }
+
+    this.rendered = true;
   }
 
   /**
@@ -599,8 +602,13 @@ class Brochure {
    */
   init() {
     if (!(this.el instanceof Element)) throw new Error('Empty DOM node to create brochure');
+    // if brochure already rendered - don't init
+    if (this.rendered === true) return;
 
     this.width = this.el.getBoundingClientRect().width;
+    // if DOM Element hided - don't init
+    if (this.width === 0) return;
+
     this.height = this.pagination.show === true
       ? this.height - Math.ceil(this.pagination.max / 10) * PAGINATION_HEIGHT
       : this.height;

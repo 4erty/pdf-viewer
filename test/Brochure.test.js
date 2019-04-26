@@ -17,22 +17,22 @@ describe('Testing Brochure class.', () => {
     });
   });
 
-  describe('Created brochure', () => {
-    const node = document.createElement('div');
-    const brochure = new Brochure({
-      htmlNode: node,
-      contentType: 'pdf',
-    });
-    brochure.init();
+  // describe('Created brochure', () => {
+  //   const node = document.createElement('div');
+  //   const brochure = new Brochure({
+  //     htmlNode: node,
+  //     contentType: 'pdf',
+  //   });
+  //   brochure.init();
 
-    test('has contentType property', () => {
-      expect(brochure).toHaveProperty('contentType');
-    });
+  //   test('has contentType property', () => {
+  //     expect(brochure).toHaveProperty('contentType');
+  //   });
 
-    test('brochure.book is div HTML Element', () => {
-      expect(brochure.book).toBeInstanceOf(HTMLDivElement);
-    });
-  });
+  //   test('brochure.book is div HTML Element', () => {
+  //     expect(brochure.book).toBeInstanceOf(HTMLDivElement);
+  //   });
+  // });
 
   // describe('Created brochure', () => {
   //   const node = document.createElement('div');
