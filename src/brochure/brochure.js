@@ -441,9 +441,10 @@ class Brochure {
     this.book.removeEventListener(events.start, this.flip);
     this.book.addEventListener(events.start, this.flip);
 
-    this.el.removeChild(this.loading);
+    if (!this.saveLastSeenPage) this.el.removeChild(this.loading);
 
-    if (this.saveLastSeenPage === true) {
+    if (this.saveLastSeenPage === true && this.contentType !== 'pdf') {
+      this.el.removeChild(this.loading);
       this.id = getId(this.el);
       const pageNumber = parseInt(localStorage.getItem(this.id), 10);
       if (pageNumber) this.setCurrentPage(pageNumber);
@@ -574,11 +575,19 @@ class Brochure {
           canvasContext: context,
           viewport: viewport,
         };
+
         await page.render(renderContext);
         this.pages.push(page);
         this.pageContentNodes.push(canvas);
         if (!this.rendered && i >= renderedIndex) {
           this.render();
+        }
+
+        if (this.saveLastSeenPage === true && i === this.numPages) {
+          this.el.removeChild(this.loading);
+          this.id = getId(this.el);
+          const pageNumber = parseInt(localStorage.getItem(this.id), 10);
+          if (pageNumber) this.setCurrentPage(pageNumber);
         }
       }
     } catch (err) {
@@ -598,8 +607,8 @@ class Brochure {
       if (i === 0) {
         this.bookWidth = this.width;
         this.book.style.width = this.bookWidth + 'px';
-        // if height isn't set - calculate height
-        // if (this.initialHeight === -1) this.setHeight();
+        if (this.initialHeight !== -1) this.book.style.height = this.height + 'px';
+        if (this.initialHeight === -1) this.book.style.height = this.bookWidth / ASPECT_RATIO + 'px';
         this.posX = this.book.getBoundingClientRect().x || this.book.getBoundingClientRect().left;
         this.posY = this.book.getBoundingClientRect().y || this.book.getBoundingClientRect().top;
       }
@@ -613,7 +622,8 @@ class Brochure {
           scrolling: 'no',
         });
       content.style.width = this.bookWidth / 2 + 'px';
-      content.style.height = this.height + 'px';
+      if (this.initialHeight !== -1) content.style.height = this.height + 'px';
+      if (this.initialHeight === -1) content.style.height = this.bookWidth / ASPECT_RATIO + 'px';
       this.pageContentNodes.push(content);
     }
     this.render();
@@ -652,14 +662,17 @@ class Brochure {
     let scale = 1;
     let bookHeight = this.getHeight(this.book.getBoundingClientRect().height);
     let bookWidth = this.width;
+    let widthScale = Math.round(1000 * bookWidth / viewport.width / 2) / 1000;
+    let heightScale = Math.round(1000 * bookHeight / viewport.height) / 1000;
+
     if (viewport.height >= viewport.width) {
-      scale = bookWidth >= bookHeight
-        ? Math.round(1000 * bookHeight / viewport.height) / 1000
-        : Math.round(1000 * bookWidth / viewport.height / 2) / 1000;
+      scale = heightScale * viewport.width <= bookWidth / 2
+        ? heightScale
+        : widthScale;
     }
 
     if (viewport.height < viewport.width) {
-      scale = Math.round(1000 * bookWidth / viewport.width) / 1000;
+      scale = widthScale;
     }
 
     return scale;
@@ -696,6 +709,7 @@ class Brochure {
     this.pageNodes = [];
     this.pageContentNodes = [];
     this.currentPage = 0;
+    this.renderedPages = 0;
     if (this.saveLastSeenPage === true) localStorage.setItem(this.id, 0);
     if (this.contentType === 'pdf') this.initPdf();
     if (this.contentType === 'page' && Array.isArray(this.url)) this.initPage();
