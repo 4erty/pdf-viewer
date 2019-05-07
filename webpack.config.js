@@ -40,14 +40,14 @@ module.exports = {
           },
         ],
       },
-      {
-        test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
-        loader: 'babel-loader',
-        options: {
-          configFile: path.join(__dirname, './babel.config.js'),
-        },
-      },
+      // {
+      //   test: /\.js$/,
+      //   exclude: /(node_modules|bower_components)/,
+      //   loader: 'babel-loader',
+      //   options: {
+      //     configFile: path.join(__dirname, './babel.config.js'),
+      //   },
+      // },
     ],
   },
 

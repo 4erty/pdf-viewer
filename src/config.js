@@ -8,6 +8,10 @@ export const events = isTouch
 
 // css font-size + padding + margin for class brochure-title
 export const TITLE_HEIGHT = 48;
+
 // pagination height
 export const PAGINATION_HEIGHT = 96;
 export const DOWNLOAD_BUTTON_HEIGHT = 48;
+
+// brochure default aspect ratio
+export const ASPECT_RATIO = 1.6;
